@@ -1,0 +1,27 @@
+.sound {
+  width: 50px;
+  background-color: lightgray;
+  border: 1px solid gray;
+  display: table-cell;
+}
+
+.basictable {
+  border: 2px solid black;
+  background-color: lightblue;
+}
+
+.basictable td {
+  background-color: lightblue;
+  padding: 1px;
+  border: 1px solid black;
+}
+
+.basictable th {
+  background-color: lightyellow;
+  padding: 1px;
+  border: 1px solid black;
+}
+
+.basictable tr {
+  border: 1px solid gray;
+}
