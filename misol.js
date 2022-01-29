@@ -104,15 +104,21 @@ function parse_rightleft_context(contextstring, classes){
 
 function parse_context(contextstring) {
   if (contextstring == "") {
-    return [[], []];
+    return [[], [], ["", ""]];
   }
   var right, left;
-  var sound;
-  /* TODO add the sound here */
-  //[right, left] = contextstring.split(/\s*@*[^\s]*_\s*/);
-  [right, left] = contextstring.split(/\s*_\s*/);
-  return [right, left];
-
+  var matches = contextstring.match(/\s{0,1}@{1,1}([^\s]*):{1,1}([^\s]*)_\s{0,1}|\s{0,1}()_\s{0,1}/);
+  console.log("context", contextstring, matches);
+  if (typeof matches[1] != "undefined") {
+    var tier = matches[1];
+    var sound = matches[2];
+  }
+  else {
+    var tier = "";
+    var sound = "";
+  }
+  [left, right] = contextstring.split(/\s{0,1}@{1,1}[^\s]*:{1,1}[^\s]*_\s{0,1}|\s{0,1}_\s{0,1}/);
+  return [left, right, [tier, sound]];
 }
 
 
@@ -155,14 +161,13 @@ class SoundClasses {
     /* parse the sound laws */
     var source, sources, target, targets, context;
     var law;
-    var right, left;
+    var right, left, self_tier;
     var before, after, k, m, n, idxs;
     this.laws = {};
     var snd;
     var ctxts;
     for (i=0; law=laws[i]; i++) {
       [source, target, context] = parse_law(law);
-      console.log(source, target, context);
       [sources, targets] = [this.classes[source], this.classes[target]];
       if (sources.length != targets.length) {
         //alert("source and target have different lengths in law"+i);
@@ -170,22 +175,24 @@ class SoundClasses {
       }
       for (j=0; j<sources.length; j++) {
         [source, target] = [sources[j], targets[j]];
-        [right, left] = parse_context(context);
-        before = parse_rightleft_context(right, this.classes);
-        after = parse_rightleft_context(left, this.classes);
-        idxs = [];
-        for (k=0; k<before.length; k++) {
-          idxs.push(-(k+1));
-        }
-        idxs.push(0);
-        for (k=0; k<after.length; k++) {
-          idxs.push(k+1);
-        }
-        if (source in this.laws) {
-          this.laws[source].push([target, before[0], before[1], after[0], after[1]]);
+        [left, right, self_tier] = parse_context(context);
+        if (left != "") {
+          before = parse_rightleft_context(left, this.classes);
         }
         else {
-          this.laws[source] = [[target, before[0], before[1], after[0], after[1]]];
+          before = [[], []];
+        }
+        if (right != "") {
+          after = parse_rightleft_context(right, this.classes);
+        }
+        else {
+          after = [[], []];
+        }
+        if (source in this.laws) {
+          this.laws[source].push([target, before[0], before[1], self_tier, after[0], after[1]]);
+        }
+        else {
+          this.laws[source] = [[target, before[0], before[1], self_tier, after[0], after[1]]];
         }
       }
     }
@@ -214,8 +221,8 @@ class SoundClasses {
             this.tiers.push(tier);
           }
         }
-        for (j=0; j<this.laws[sound][i][4].length; j++) {
-          tier = this.laws[sound][i][4][j];
+        for (j=0; j<this.laws[sound][i][5].length; j++) {
+          tier = this.laws[sound][i][5][j];
           if (tier == "") {
             tier = "segments_right_"+(j+1);
           }
@@ -226,17 +233,23 @@ class SoundClasses {
             this.tiers.push(tier);
           }
         }
+        if (this.laws[sound][i][3][0] != "") {
+          if (this.tiers.indexOf(this.laws[sound][i][3][0]+"_self_0") == -1) {
+            this.tiers.push(this.laws[sound][i][3][0]+"_self_0");
+          }
+        }
 
         if (this.laws[sound][i][1].length > maxA) {
           maxA = this.laws[sound][i][1].length;
         }
-        if (this.laws[sound][i][3].length > maxB) {
-          maxB = this.laws[sound][i][3].length;
+        if (this.laws[sound][i][4].length > maxB) {
+          maxB = this.laws[sound][i][4].length;
         }
       }
     }
+    /* now that we have learned all tiers, we can assemble them for each sound */
     var idxs = [];
-    var tier_right, tier_left;
+    var tier_right, tier_left, tier_self;
     
     for (i=maxA; i>0; i--) {
       idxs.push(-maxA);
@@ -245,17 +258,14 @@ class SoundClasses {
     for (i=1; i<maxB+1; i++) {
       idxs.push(i);
     }
-    /* here, we need to assemble our tiers according to their order, which we have determined from the data in the step before TODO */
+    /* we fill our dictionary for the tier values in the following */
     for (sound in this.laws) {
       this.all_laws[sound] = [];
       claw = this.laws[sound];
       for (i=0; i<claw.length; i++) {
-        [target, right, tier_right, left, tier_left] = claw[i];
-        tier = {};
+        [target, left, tier_left, tier_self, right, tier_right] = claw[i];
+        tier = {"target": target};
         /* assign the tier information from our index here, this means, we need to trace the name spaces we used here */
-        //for (j=maxA; j>left.length; j++) {
-        //  tier.push(["Ø"]);
-        //}
         for (j=left.length-1; j>=0; j--) {
           if (tier_left[j] == "") {
             tier["segments_left_"+(j+1)] = left[j];
@@ -266,12 +276,16 @@ class SoundClasses {
         }
         for (j=0; j<right.length; j++) {
           if (tier_right[j] == "") {
-            tier["segments_left_"+(j+1)] = right[j];
+            tier["segments_right_"+(j+1)] = right[j];
           }
           else {
-            tier[tier_right[j]+"_left_"+(j+1)] = right[j];
+            tier[tier_right[j]+"_right_"+(j+1)] = right[j];
           }
         }
+        if (tier_self[0] != "") {
+          tier[tier_self[0]+"_self_0"] = tier_self[1];
+        }
+
         for (j=0; j<this.tiers.length; j++) {
           if (!(this.tiers[j] in tier)) {
             tier[this.tiers[j]] = ["Ø"];
@@ -285,42 +299,47 @@ class SoundClasses {
 
 
 
-var items = [
-  "P = p pʰ b",
-  "K = k kʰ g",
-  "T = t tʰ d",
-  "C1 = p t k",
-  "TONES = 1 2 3 4",
-  "C2 = pʰ tʰ kʰ",
-  "C3 = b d g",
-  "V = a e i o u",
-  "VV = a: e: i: o: u:",
-  "C = C1 C2 C3"
-];
+function test(){
+  var items = [
+    "P = p pʰ b",
+    "K = k kʰ g",
+    "T = t tʰ d",
+    "C1 = p t k",
+    "TONES = 1 2 3 4",
+    "C2 = pʰ tʰ kʰ",
+    "C3 = b d g",
+    "V = a e i o u",
+    "VV = a: e: i: o: u:",
+    "C = C1 C2 C3"
+  ];
+  
+  var laws = [
+    "p > b / V _ V k",
+    "i > i",
+    "k > g / V @tone:2_"
+  ];
+  
+  var cls = new SoundClasses(items, laws);
+  //console.log(cls)
+  
+  var context = "C2 [a e i o u] [o e] _";
+  [right, left] = parse_context(context);
+  console.log(right+"|");
+  console.log(left+"|");
+  
+  var out = parse_rightleft_context(right, cls.classes);
+  console.log(out);
+  
+  var out = parse_rightleft_context(left, cls.classes);
+  console.log(out);
+  
+  console.log(cls.laws["p"][0]);
+  cls.assemble_laws()
+  console.log(cls.all_laws["k"])
+  console.log(cls.all_laws["i"])
+  
+  console.log(cls.tiers);
+  console.log(cls.laws["i"]);
+}
 
-var laws = [
-  "p > b / V _ V k",
-  "k > g / V _ @tone:2"
-];
-
-var cls = new SoundClasses(items, laws);
-//console.log(cls)
-
-var context = "C2 [a e i o u] [o e] _";
-[right, left] = parse_context(context);
-console.log(right+"|");
-console.log(left+"|");
-
-var out = parse_rightleft_context(right, cls.classes);
-console.log(out);
-
-var out = parse_rightleft_context(left, cls.classes);
-console.log(out);
-
-console.log(cls.laws["p"][0]);
-cls.assemble_laws()
-console.log(cls.all_laws["k"])
-console.log(cls.tiers);
-//console.log(cartesianProduct(...out));
-
-/* TODO: bug in "V _" context */
+test()
