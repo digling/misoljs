@@ -3,6 +3,17 @@
   background-color: lightgray;
   border: 1px solid gray;
   display: table-cell;
+  margin: 5px;
+  padding: 5px;
+  font-weight: bold;
+}
+
+.unifiedsound {
+  background-color: black;
+  border: 1px dashed crimson;
+  display: table-cell;
+  padding: 2px;
+  margin: 5px;
 }
 
 .basictable {
@@ -13,21 +24,26 @@
 
 .baseframe {
   padding: 5px;
+  margin: 5px;
 }
+
 .basictable td {
-  background-color: lightyellow;
-  padding: 1px;
+  background-color: white;
+  padding: 5px;
+  margin: 5px;
   border: 1px solid black;
 }
 
 .basictable th {
-  background-color: lightyellow;
-  padding: 1px;
+  background-color: white;
+  padding: 5px;
   border: 1px solid black;
+  margin: 5px;
 }
 
 .basictable tr {
   border: 1px solid gray;
+  background-color: lightyellow;
 }
 
 .inputtext {
@@ -38,8 +54,27 @@
 
 .mybutton {
   background-color: black;
+  border: 3px solid lightgray;
   color: white;
   font-weight: bold;
   font-family: monospace, monospace;
   padding: 5px;
+  margin: 5px;
+}
+
+.tier {
+  color: crimson;
+  margin: 2px;
+}
+
+.pipe {
+  background-color: black;
+  color: white;
+  width: 3px;
+  display: table-cell;
+}
+
+.lawidx {
+  color: crimson;
+  margin: 2px;
 }

@@ -7,6 +7,9 @@
 </head>
 <body>
   <h1>Define Sound Classes and Sound Laws</h1>
+
+  We define sound classes for all sounds in our sample, to account for the common groupings used by linguists to mark sounds that share certain properties (similar to distinctive features, but more flexible). See the code examples on how features are defined. Note that individual sounds and all individual segments (e.g., also the equation mark) need to be segmented by a space to be recognized by the program. <br>
+  We define sound laws in the typical fashion used in historical linguistics, with the exception that we use a strict space separation to define sounds. In addition, we allow to address suprasegmental aspects of a sequence, which need to be defined by providing another tier that marks the respective suprasgemental aspect for each segment in your data by the construct <font style="font-family: monospace,monospace;">@TIER:VALUE</font> which precedes a sound class or a sound. With this construct, you can also mark the source sound which is supposed to be modified directly, as shown in our example.
   <div style="display: flex">
     <textarea class="inputtext" cols="40" rows="10" id="sound_classes" placeholder="#insert your data here
 P = p pʰ b
@@ -29,12 +32,15 @@ C3 > C3
   </div>
   <button class="mybutton" onclick="loaddata()">LOAD DATA</button>
   <button class="mybutton" onclick="loadsampledata()">LOAD SAMPLE DATA</button>
+  <button style="display:none" id="settingstoggler" class="mybutton" onclick="togglesettings();">SHOW CLASSES AND LAWS</button>
 
-  <div id="settings" style="display: flex">
+  <div id="settings" style="display: none;">
       <div class="baseframe" id="sound_classes_out"></div>
       <div class="baseframe" id="sound_laws_out"></div>
   </div>
-  <h2>Apply Sound Laws Forwards to Your Input Sequences</h2>
+
+  <h2>Apply Achronological Sound Laws Forwards to Your Input Sequences</h2>
+  Reconstruction here uses anachronical sound laws which are applied to each segment of a sequence without taking into account that the application of a sound law might result in the modification of the sequence itself. Anachronical sound laws are a very powerful analytical step that helps to identify chronological sound laws properly. While you can provide direct suprasegmental information by adding multi-tiered sequences, we provide some basic functions by which these tiers can be computed. If you want to make use of these functions that take a sequence as input and ield a tier as output that is passed to the algorith, your tier-name needs to be identical with the function and preceded by an @ symbol, such as, e.g., @tone in our example.
   <div style="display: flex">
     <textarea class="inputtext" cols="40" rows="5" id="tiers" placeholder="# insert your tiers here, one per line
 segments
@@ -52,6 +58,14 @@ d u
   <div id="reconstructions" style="display: flex">
       <div class="baseframe" id="reconstructions_out"></div>
   </div>
+  <h2>Apply Chronological Sound Laws Forward to Your Input Sequences</h2>
+  +++ coming soon +++
+  <h2>Apply Achronological Sound Laws Backwards to your Input Sequences</h2>
+
+  +++ coming soon +++
+  <h2>Apply Chronological Sound Laws Backwards to your Input Sequences</h2>
+
+  +++ coming soon +++
 
 </body>
 <script src="action.js"></script>

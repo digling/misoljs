@@ -125,7 +125,7 @@ function parse_context(contextstring) {
 class SoundClasses {
   constructor (items, laws){
     /* parse the sound classes */
-    this.classes = {"^": ["^"], "$": ["$"]};
+    this.classes = {"^": ["^"], "$": ["$"], "-": ["-"]};
     this.sounds = {};
     var i, j, k, cls, sounds_, sounds, sound;
     for (i=0; i<items.length; i++) {
@@ -165,15 +165,25 @@ class SoundClasses {
     var before, after, k, m, n, idxs;
     this.laws = {};
     this.raw_laws = {};
-    var snd;
+    var snd, elm;
     var ctxts;
     for (i=0; law=laws[i]; i++) {
       this.raw_laws[i+1] = law;
       [source, target, context] = parse_law(law);
-      [sources, targets] = [this.classes[source], this.classes[target]];
+      sources = [];
+      targets = [];
+      source = source.split(" ");
+      target = target.split(" ");
+      for (j=0; elm=source[j]; j++) {
+        sources = sources.concat(this.classes[elm]);
+      }
+      for (j=0; elm=target[j]; j++) {
+        targets = targets.concat(this.classes[elm]);
+      }
+      console.log("sourcestargets", sources, targets);
+      //[sources, targets] = [this.classes[source], this.classes[target]];
       if (sources.length != targets.length) {
-        //alert("source and target have different lengths in law"+i);
-        console.log('wrong lengths');
+        alert("source and target have different lengths in law"+i);
       }
       for (j=0; j<sources.length; j++) {
         [source, target] = [sources[j], targets[j]];
@@ -211,7 +221,6 @@ class SoundClasses {
     for (sound in this.laws) {
       for (i=0; i<this.laws[sound].length; i++) {
         /* add the tier information */
-        console.log(this.laws[sound][i]);
         for (j=0; j<this.laws[sound][i][2].length; j++) {
           tier = this.laws[sound][i][2][j];
           if (tier == "") {
@@ -287,7 +296,7 @@ class SoundClasses {
           }
         }
         if (tier_self[0] != "") {
-          tier[tier_self[0]+"_self_0"] = tier_self[1];
+          tier[tier_self[0]+"_self_0"] = this.classes[tier_self[1]];
         }
 
         for (j=0; j<this.tiers.length; j++) {
@@ -304,9 +313,24 @@ class SoundClasses {
         }
       }
     }
+    /* iterate over all laws to get the target to source array */
+    this.target2source = {};
+    var sound, tiers, tier;
+    for (sound in this.all_laws) {
+      tiers = this.all_laws[sound];
+      for (i=0; i<tiers.length; i++) {
+        tier = tiers[i];
+        if (tier["target"] in this.target2source && this.target2source[tier["target"]].indexOf(tier["source"]) == -1) {
+          this.target2source[tier["target"]].push(tier["source"]);
+        }
+        else {
+          this.target2source[tier["target"]] = [tier["source"]];
+        }
+      }
+    }
     /* process tiers to identify the basic encoding routine */
   }
-  anachronical_reconstruction(sequence) {
+  achro_forward(sequence) {
     /* read in the information about the sequence */
     /* sequence must be encoded as a dictionary {"segments": "t o x t a", "stress": "1 1 1 0 0"} */
     var length = sequence["segments"].length;
@@ -374,7 +398,62 @@ class SoundClasses {
     }
     return output;
   }
+  achro_backward (sequence, funcs) {
+    var i, j;
+    var recs = [];
+    for (i=0; i<sequence.length; i++) {
+      recs.push(this.target2source[sequence[i]]);
+    }
+    var possibles = cartesianProduct(...recs);
+    var selected = [];
+    var this_sequence;
+    var proposal, matched;
+    for (i=0; i<possibles.length; i++) {
+      this_sequence = {"segments": possibles[i]};
+      for (j=0; j<funcs.length; j++) {
+        this_sequence[funcs[j]] = TIERS[funcs[j]](possibles[i]);
+      }
+      /* reconstruct */
+      proposal = this.achro_forward(this_sequence);
+      matched = true;
+      for (j=0; j<proposal.length; j++) {
+        if (proposal[j].length == 1 && proposal[j][0][0] == sequence[j]) {
+        }
+        else {
+          matched = false;
+        }
+      }
+      if (matched) {
+        selected.push(possibles[i]);
+      }
+    }
+    return selected;
+  }
 }
+
+var TIERS = {};
+TIERS.tone = function(sequence){
+  var i, j, s;
+  var out = [];
+  var elm, matched;
+  var lastidx = 0;
+  for (i=0; i<sequence.length; i++) {
+    elm = sequence[i];
+    matched = elm.match(/([¹²³⁴⁵⁰123456789]{1,})/);
+    if (matched && matched[1] == elm){
+      out.push(elm);
+      for (j=lastidx; j<i+1; j++) {
+        out[j] = elm;
+      }
+      lastidx = i+1;
+    }
+    else {
+      out.push(0);
+    }
+  }
+  return out;
+};
+
 
 
 function test(){
@@ -430,4 +509,4 @@ function test(){
 
 }
 
-test()
+//test()
