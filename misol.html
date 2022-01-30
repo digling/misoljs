@@ -6,45 +6,54 @@
   <link rel="stylesheet" type="text/css" href="misol.css" />
 </head>
 <body>
+  <h1>Define Sound Classes and Sound Laws</h1>
+  <div style="display: flex">
+    <textarea class="inputtext" cols="40" rows="10" id="sound_classes" placeholder="#insert your data here
+P = p pʰ b
+K = k kʰ g
+T = t tʰ d
+C1 = p t k
+C2 = pʰ tʰ kʰ
+C3 = b d g
+TONE = ⁵⁵ ³⁵ ²¹⁴ ⁵¹
+V = a e i o u
+"></textarea>
+    <textarea class="inputtext" cols="40" rows="10" id="sound_laws" placeholder="#insert your laws here
+C3 > C2 / @tone:²¹⁴_
+C3 > C1 / @tone:⁵⁵_
+C3 > C1 / @tone:⁵¹_
+C3 > C1 / @tone:³⁵_
+C2 > C2
+C3 > C3
+"></textarea>
+  </div>
+  <button class="mybutton" onclick="loaddata()">LOAD DATA</button>
+  <button class="mybutton" onclick="loadsampledata()">LOAD SAMPLE DATA</button>
 
-  <textarea cols="40" row="30" id="sound_classes"></textarea>
-  <textarea cols="40" row="30" id="sound_laws"></textarea>
-  <button id="parsesounds" onclick="parse_sounds()">Parse Sounds</button>
-  <table><tr>
-      <td><div id="sound_classes_out"></div><td>
-          <td><div id="sound_laws_out"></div></td></tr></table>
+  <div id="settings" style="display: flex">
+      <div class="baseframe" id="sound_classes_out"></div>
+      <div class="baseframe" id="sound_laws_out"></div>
+  </div>
+  <h2>Apply Sound Laws Forwards to Your Input Sequences</h2>
+  <div style="display: flex">
+    <textarea class="inputtext" cols="40" rows="5" id="tiers" placeholder="# insert your tiers here, one per line
+segments
+tone
+"></textarea>
+    <textarea class="inputtext" cols="40" rows="5" id="sequences" placeholder="# insert your sequence, separated by a blank line
+p a
+⁵⁵ ⁵⁵
+
+d u
+²¹⁴ ²¹⁴
+"></textarea>
+  </div>
+  <button class="mybutton" onclick="reconstruct()">APPLY SOUND LAWS</button>
+  <div id="reconstructions" style="display: flex">
+      <div class="baseframe" id="reconstructions_out"></div>
+  </div>
+
 </body>
-<script>
-  function parse_sounds() {
-    var i, sound;
-    var tf = document.getElementById("sound_classes").value.split("\n");
-    var laws = document.getElementById("sound_laws").value.split("\n");
-    var cls = new SoundClasses(tf, laws);
-    cls.assemble_laws();
-    var scls = document.getElementById("sound_classes_out");
-    var txt = '<table class="basictable"><th>Class</th><th>Sounds</th></tr>';
-    for (this_cls in cls.classes) {
-      txt += '<tr><td>'+this_cls+"</td><td>";
-      for (i=0; i<cls.classes[this_cls].length; i++) {
-        sound = cls.classes[this_cls][i];
-        txt += '<span class="sound">'+sound+'</span>'; 
-      }
-      txt += "</td></tr>";
-    }
-    txt += "</table>";
-    scls.innerHTML = txt;
-    var slaws = document.getElementById("sound_laws_out");
-    txt = '<table class="basictable"><tr><th>ID</th><th>Law</th><th>Source</th><th>Target</th></tr>';
-    for (i=0; i<Object.keys(cls.raw_laws).length; i++) {
-      for (j=0; j<cls.laws2tiers[i+1].length; j++) {
-        txt += "<tr><td>"+(i+1)+"</td><td>"+cls.raw_laws[(i+1)]+"</td><td>"+cls.laws2tiers[i+1][j]["source"]+"</td><td>"+cls.laws2tiers[i+1][j]["target"]+"</td></tr>";
-      }
-    }
-    txt += "</table>";
-    slaws.innerHTML = txt;
-    console.log(cls);
-    return cls;
-  }
-</script>
+<script src="action.js"></script>
 
 </html>
