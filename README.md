@@ -27,7 +27,15 @@ To represent the tiers in sound laws, we take the `Segment` level as our default
 
 ```
 p > b / V @stress:1_
+```
+
+This means of course that stress needs to be defined when applying this sound law, and that the input sequence must consist of two tiers, one providing the Segments and one Stress.
 
 ### 4 Applying Sound Laws in Multi-Tiers
 
-Applying a sound law in our multi-tier system is 
+Applying a sound law in our multi-tier system is straightforward. 
+
+* Based on the information about the tiers that we need to compute, we convert our input sequence (which may itself consist of multiple tiers) into a vector in which the different contexts are resolved.
+* We then proceed segment by segment and check if the source sound matches with a given tier sequence. If this is the case, the target sound will be placed instead of the source sound.
+
+

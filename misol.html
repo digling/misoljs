@@ -10,15 +10,17 @@
   <textarea cols="40" row="30" id="sound_classes"></textarea>
   <textarea cols="40" row="30" id="sound_laws"></textarea>
   <button id="parsesounds" onclick="parse_sounds()">Parse Sounds</button>
-  <div id="sound_classes_out"></div>
-  <div id="sound_laws_out"></div>
-
+  <table><tr>
+      <td><div id="sound_classes_out"></div><td>
+          <td><div id="sound_laws_out"></div></td></tr></table>
 </body>
 <script>
   function parse_sounds() {
     var i, sound;
     var tf = document.getElementById("sound_classes").value.split("\n");
-    var cls = new SoundClasses(tf, []);
+    var laws = document.getElementById("sound_laws").value.split("\n");
+    var cls = new SoundClasses(tf, laws);
+    cls.assemble_laws();
     var scls = document.getElementById("sound_classes_out");
     var txt = '<table class="basictable"><th>Class</th><th>Sounds</th></tr>';
     for (this_cls in cls.classes) {
@@ -31,6 +33,15 @@
     }
     txt += "</table>";
     scls.innerHTML = txt;
+    var slaws = document.getElementById("sound_laws_out");
+    txt = '<table class="basictable"><tr><th>ID</th><th>Law</th><th>Source</th><th>Target</th></tr>';
+    for (i=0; i<Object.keys(cls.raw_laws).length; i++) {
+      for (j=0; j<cls.laws2tiers[i+1].length; j++) {
+        txt += "<tr><td>"+(i+1)+"</td><td>"+cls.raw_laws[(i+1)]+"</td><td>"+cls.laws2tiers[i+1][j]["source"]+"</td><td>"+cls.laws2tiers[i+1][j]["target"]+"</td></tr>";
+      }
+    }
+    txt += "</table>";
+    slaws.innerHTML = txt;
     console.log(cls);
     return cls;
   }

@@ -125,7 +125,7 @@ function parse_context(contextstring) {
 class SoundClasses {
   constructor (items, laws){
     /* parse the sound classes */
-    this.classes = {};
+    this.classes = {"^": ["^"], "$": ["$"]};
     this.sounds = {};
     var i, j, k, cls, sounds_, sounds, sound;
     for (i=0; i<items.length; i++) {
@@ -164,9 +164,11 @@ class SoundClasses {
     var right, left, self_tier;
     var before, after, k, m, n, idxs;
     this.laws = {};
+    this.raw_laws = {};
     var snd;
     var ctxts;
     for (i=0; law=laws[i]; i++) {
+      this.raw_laws[i+1] = law;
       [source, target, context] = parse_law(law);
       [sources, targets] = [this.classes[source], this.classes[target]];
       if (sources.length != targets.length) {
@@ -189,10 +191,10 @@ class SoundClasses {
           after = [[], []];
         }
         if (source in this.laws) {
-          this.laws[source].push([target, before[0], before[1], self_tier, after[0], after[1]]);
+          this.laws[source].push([target, before[0], before[1], self_tier, after[0], after[1], i+1]);
         }
         else {
-          this.laws[source] = [[target, before[0], before[1], self_tier, after[0], after[1]]];
+          this.laws[source] = [[target, before[0], before[1], self_tier, after[0], after[1], i+1]];
         }
       }
     }
@@ -209,6 +211,7 @@ class SoundClasses {
     for (sound in this.laws) {
       for (i=0; i<this.laws[sound].length; i++) {
         /* add the tier information */
+        console.log(this.laws[sound][i]);
         for (j=0; j<this.laws[sound][i][2].length; j++) {
           tier = this.laws[sound][i][2][j];
           if (tier == "") {
@@ -249,7 +252,7 @@ class SoundClasses {
     }
     /* now that we have learned all tiers, we can assemble them for each sound */
     var idxs = [];
-    var tier_right, tier_left, tier_self;
+    var tier_right, tier_left, tier_self, idx;
     
     for (i=maxA; i>0; i--) {
       idxs.push(-maxA);
@@ -259,12 +262,13 @@ class SoundClasses {
       idxs.push(i);
     }
     /* we fill our dictionary for the tier values in the following */
+    this.laws2tiers = {};
     for (sound in this.laws) {
       this.all_laws[sound] = [];
       claw = this.laws[sound];
       for (i=0; i<claw.length; i++) {
-        [target, left, tier_left, tier_self, right, tier_right] = claw[i];
-        tier = {"target": target};
+        [target, left, tier_left, tier_self, right, tier_right, idx] = claw[i];
+        tier = {"source": sound, "target": target, "id": idx};
         /* assign the tier information from our index here, this means, we need to trace the name spaces we used here */
         for (j=left.length-1; j>=0; j--) {
           if (tier_left[j] == "") {
@@ -292,11 +296,85 @@ class SoundClasses {
           }
         }
         this.all_laws[sound].push(tier);
+        if (idx in this.laws2tiers) {
+          this.laws2tiers[idx].push(tier);
+        }
+        else {
+          this.laws2tiers[idx] = [tier];
+        }
       }
     }
+    /* process tiers to identify the basic encoding routine */
+  }
+  anachronical_reconstruction(sequence) {
+    /* read in the information about the sequence */
+    /* sequence must be encoded as a dictionary {"segments": "t o x t a", "stress": "1 1 1 0 0"} */
+    var length = sequence["segments"].length;
+    var i, j, k, tier, segment;
+    var label, pos, idx;
+    var source, target;
+    var recs;
+
+    var this_vector;
+    var matched;
+    var val;
+    var output = [];
+
+    for (i=0; i<length; i++) {
+      source = sequence["segments"][i];
+      this_vector = [];
+      for (j=0; tier=this.tiers[j]; j++) {
+        [label, pos, idx] = tier.split("_");
+        idx = parseInt(idx);
+        if (pos == "right") {
+          if (i+idx > length-1) {
+            segment = "$";
+          }
+          else {
+            segment = sequence[label][(i+idx)];
+          }
+        }
+        else if (pos == "left") {
+          if (i-idx < 0) {
+            segment = "^";
+          }
+          else {
+            segment = sequence[label][(i-idx)];
+          }
+        }
+        else if (pos == "self") {
+          segment = sequence[label][i];
+        }
+        this_vector.push(segment);
+      }
+      /* now search through all tiers with this sound as source */
+      recs = [];
+      try {
+        for (j=0; j<this.all_laws[source].length; j++) {
+          matched = true;
+          for (k=0; k<this.tiers.length; k++) {
+            val = this.all_laws[source][j][this.tiers[k]];
+            if (val.indexOf(this_vector[k]) == -1 && val.indexOf("Ø") == -1) {
+              matched = false;
+              break;
+            }
+          }
+          if (matched) {
+             recs.push([this.all_laws[source][j]["target"], this.all_laws[source][j]["id"]]);
+          }
+        }
+        if (recs.length == 0) {
+          recs = [["?", 0]];
+        }
+      }
+      catch {
+        recs = [['!'+source, 0]]
+      }
+      output.push(recs);
+    }
+    return output;
   }
 }
-
 
 
 function test(){
@@ -310,17 +388,24 @@ function test(){
     "C3 = b d g",
     "V = a e i o u",
     "VV = a: e: i: o: u:",
-    "C = C1 C2 C3"
+    "C = C1 C2 C3",
+    "r.e = r.e",
+    "r = r",
   ];
   
   var laws = [
+    "C1 > C2 / @tone:2_",
     "p > b / V _ V k",
     "i > i",
-    "k > g / V @tone:2_"
+    "V > V",
+    "VV > VV",
+    "k > g / V @tone:2_",
+    "r > r.e / _ $",
+    "a > a: / _ $",
+    "t > d / ^ _",
   ];
   
   var cls = new SoundClasses(items, laws);
-  //console.log(cls)
   
   var context = "C2 [a e i o u] [o e] _";
   [right, left] = parse_context(context);
@@ -334,12 +419,15 @@ function test(){
   console.log(out);
   
   console.log(cls.laws["p"][0]);
-  cls.assemble_laws()
-  console.log(cls.all_laws["k"])
-  console.log(cls.all_laws["i"])
+  cls.assemble_laws();
+  console.log(cls.all_laws["k"]);
+  console.log(cls.all_laws["r"][0]);
   
   console.log(cls.tiers);
   console.log(cls.laws["i"]);
+  console.log(cls.anachronical_reconstruction({"segments": ["t", "a"], "tone": ["2", "2"]}));
+  console.log(cls.anachronical_reconstruction({"segments": ["q", "a"], "tone": ["2", "2"]}));
+
 }
 
 test()
