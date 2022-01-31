@@ -55,18 +55,36 @@ d u
 "></textarea>
   </div>
   <button class="mybutton" onclick="reconstruct()">APPLY SOUND LAWS</button>
+  <button style="display:none" id="lawidxtoggler" class="mybutton" onclick="togglelawidxs();">SHOW LAW IDS</button>
   <div id="reconstructions" style="display: flex">
       <div class="baseframe" id="reconstructions_out"></div>
   </div>
-  <h2>Apply Chronological Sound Laws Forward to Your Input Sequences</h2>
-  +++ coming soon +++
-  <h2>Apply Achronological Sound Laws Backwards to your Input Sequences</h2>
+  <!--<h2>Apply Chronological Sound Laws Forward to Your Input Sequences</h2>
+    +++ coming soon +++-->
+  <h2>Apply Achronological Sound Laws Backwards to Your Input Sequences</h2>
 
-  +++ coming soon +++
-  <h2>Apply Chronological Sound Laws Backwards to your Input Sequences</h2>
+  Our backwards reconstruction starts from a target word in the language and then goes upwards to identify the sequences in the proto-language that could have accounted for this string. This requires some adjustments regarding your sound laws, since it is difficult to predict elements which have disappared, so you should adjust the laws in such a way that you avoid sound laws involving a loss of an element but instead model these as the modification of two elements in the ancestral language that become one element in the target language. Once this is accounted for, you can safely apply our procedure, which first identifies all possible source sounds, then takes the cartesian product to create all possible words from these sound combinations, and finally evaluates all of the word against the sound changes to see if these are possible.
 
-  +++ coming soon +++
+  <div style="display: flex">
+    <textarea class="inputtext" cols="40" rows="5" id="tiersbw" placeholder="# insert your tier functions here, one per line
+tone
+"></textarea>
+    <textarea class="inputtext" cols="40" rows="5" id="sequencesbw" placeholder="# insert your sequence, separated by a blank line
+p a
+d u
+"></textarea>
+  </div>
+  <button class="mybutton" onclick="backwards()">FIND PROTO-FORMS</button>
+  <div id="reconstructions" style="display: flex">
+      <div class="baseframe" id="reconstructions_bw_out"></div>
+  </div>
 
+
+
+
+  <!--<h2>Apply Chronological Sound Laws Backwards to your Input Sequences</h2>
+
+  +++ coming soon +++-->
 </body>
 <script src="action.js"></script>
 

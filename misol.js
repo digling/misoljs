@@ -108,7 +108,6 @@ function parse_context(contextstring) {
   }
   var right, left;
   var matches = contextstring.match(/\s{0,1}@{1,1}([^\s]*):{1,1}([^\s]*)_\s{0,1}|\s{0,1}()_\s{0,1}/);
-  console.log("context", contextstring, matches);
   if (typeof matches[1] != "undefined") {
     var tier = matches[1];
     var sound = matches[2];
@@ -180,7 +179,6 @@ class SoundClasses {
       for (j=0; elm=target[j]; j++) {
         targets = targets.concat(this.classes[elm]);
       }
-      console.log("sourcestargets", sources, targets);
       //[sources, targets] = [this.classes[source], this.classes[target]];
       if (sources.length != targets.length) {
         alert("source and target have different lengths in law"+i);
@@ -504,8 +502,8 @@ function test(){
   
   console.log(cls.tiers);
   console.log(cls.laws["i"]);
-  console.log(cls.anachronical_reconstruction({"segments": ["t", "a"], "tone": ["2", "2"]}));
-  console.log(cls.anachronical_reconstruction({"segments": ["q", "a"], "tone": ["2", "2"]}));
+  console.log(cls.achro_forward({"segments": ["t", "a"], "tone": ["2", "2"]}));
+  console.log(cls.achro_forward({"segments": ["q", "a"], "tone": ["2", "2"]}));
 
 }
 

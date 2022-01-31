@@ -50,14 +50,55 @@ function loaddata() {
 
 function loadsampledata() {
 
-  document.getElementById("sound_laws").value = "C1 > C1\nC3 > C2 / @tone:²¹⁴_\nC3 > C1 / @tone:⁵⁵_\nC3 > C1 / @tone:⁵¹_\nC3 > C1 / @tone:³⁵_\nC2 > C2\nV > V\nTONE > TONE";
-  document.getElementById("sound_classes").value = "P = p pʰ b\nK = k kʰ g\nT = t tʰ d\nC1 = p t k\nC2 = pʰ tʰ kʰ\nC3 = b d g\nTONE = ⁵⁵ ³⁵ ²¹⁴ ⁵¹\nV = a e i o u\nYIN = ⁵⁵ ³⁵ ⁵¹\nYANG = ²¹⁴";
+  document.getElementById("sound_laws").value = "C1 > C1\nC3 > C2 / @tone:²¹⁴_\nC3 > C1 / @tone:⁵⁵_\nC3 > C1 / @tone:⁵¹_\nC3 > C1 / @tone:³⁵_\nC2 > C2\nV > V\nTONE > TONE\nRHYME > V V V";
+  document.getElementById("sound_classes").value = "P = p pʰ b\nK = k kʰ g\nT = t tʰ d\nC1 = p t k\nC2 = pʰ tʰ kʰ\nC3 = b d g\nTONE = ⁵⁵ ³⁵ ²¹⁴ ⁵¹\nV = a e i o u\nYIN = ⁵⁵ ³⁵ ⁵¹\nYANG = ²¹⁴\nGAP = - - -\nRHYMEP = a.p e.p i.p o.p u.p\nRHYMET = a.t e.t i.t o.t u.t\nRHYMEK = a.k e.k i.k o.k u.k\nRHYME = RHYMEP RHYMET RHYMEK";
   loaddata();
   document.getElementById("tiers").value = "segments\n@tone";
   document.getElementById("sequences").value="p a ⁵⁵\n\nd u ²¹⁴\n\nd u ⁵⁵";
 }
 
+function backwards() {
+  var tiers_in_text = document.getElementById("tiersbw").value.split("\n");
+  var funcs = [];
+  tiers_in_text.forEach(function(element) {
+    if (element != "") {
+      funcs.push(element);
+    }
+  });
+
+  var sequences_in_text = document.getElementById("sequencesbw").value.split("\n");
+  var sequences = [];
+  sequences_in_text.forEach(function(elm) {
+    if (elm[0] != "#") {
+      sequences.push(elm.split(" "));
+    }
+  });
+
+  var txt = '<table class="basictable"><tr><th>NO.</th><th>TARGET</th><th>SOURCE</th></tr>';
+  var recs;
+  var count = 1;
+  sequences.forEach(function(elm) {
+    recs = CLS.achro_backward(elm, funcs);
+    if (recs[0].length == 0) {
+      recs = [["?"]];
+    }
+    txt += "<tr>";
+    for (i=0; i<recs.length; i++) {
+      txt += "<td>"+count+"</td><td>";
+      txt += '<span class="sound">'+elm.join('</span><span class="sound">')+"</span>";
+      txt += "</td><td>";
+      txt += '<span class="sound">'+recs[i].join('</span><span class="sound">')+"</span>";
+      txt += "</td></tr>";
+    }
+    count += 1;
+  });
+  txt += "</table>";
+
+  document.getElementById("reconstructions_bw_out").innerHTML = txt;
+}
+
 function reconstruct() {
+  document.getElementById("lawidxtoggler").style.display = "table-cell";
   var tiers_in_text = document.getElementById("tiers").value.split("\n");
   var sequences_in_text = document.getElementById("sequences").value.split("\n\n");
   var tiers = [];
@@ -120,7 +161,7 @@ function reconstruct() {
       }
       rec_segs = [];
       for (tgt in rec_dict) {
-        rec_segs.push('<span class="sound">'+tgt+'<sup title="Sound Law Indices" class="lawidx">'+rec_dict[tgt].join(",")+"</sup></span>");
+        rec_segs.push('<span class="sound">'+tgt+'<sup style="display:none" title="Sound Law Indices" class="lawidx">'+rec_dict[tgt].join(",")+"</sup></span>");
       }
       if (rec_segs.length > 1) {
         td += '<span class="unifiedsound">'+rec_segs.join('<span class="pipe"></span>')+'</span>';
@@ -146,5 +187,26 @@ function togglesettings(){
     settings.style.display = "none";
     document.getElementById("settingstoggler").innerHTML = "SHOW CLASSES AND LAWS";
 
+  }
+}
+
+function togglelawidxs(){
+  var i, element;
+  var docs = document.getElementsByClassName("lawidx");
+  for (i=0; element=docs[i]; i++) {
+    if (element.style.display == "none") {
+      element.style.display = "inline";
+    }
+    else {
+      element.style.display = "none";
+    }
+  }
+  
+  var lawidx = document.getElementById("lawidxtoggler");
+  if (lawidx.innerHTML == "SHOW LAW IDS") {
+    lawidx.innerHTML = "HIDE LAW IDS";
+  }
+  else {
+    lawidx.innerHTML = "SHOW LAW IDS";
   }
 }
