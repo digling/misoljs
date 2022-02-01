@@ -6,7 +6,10 @@
   <link rel="stylesheet" type="text/css" href="misol.css" />
 </head>
 <body>
-  <h1>Define Sound Classes and Sound Laws</h1>
+  <div style="max-width: 1200px;background-color: goldenrod; border: 2px solid black; padding: 5px;">
+  <h1 style="color: white;">MISoL: Modeling and Inferring Sound Laws</h1>
+  This web application allows you to define your own sound laws and apply them to your proto-forms in order to simulate regular sound change from an ancestral language to a descendant language. 
+  <h2>Define Sound Classes and Sound Laws</h2>
 
   We define sound classes for all sounds in our sample, to account for the common groupings used by linguists to mark sounds that share certain properties (similar to distinctive features, but more flexible). See the code examples on how features are defined. Note that individual sounds and all individual segments (e.g., also the equation mark) need to be segmented by a space to be recognized by the program. <br>
   We define sound laws in the typical fashion used in historical linguistics, with the exception that we use a strict space separation to define sounds. In addition, we allow to address suprasegmental aspects of a sequence, which need to be defined by providing another tier that marks the respective suprasgemental aspect for each segment in your data by the construct <font style="font-family: monospace,monospace;">@TIER:VALUE</font> which precedes a sound class or a sound. With this construct, you can also mark the source sound which is supposed to be modified directly, as shown in our example.
@@ -31,7 +34,9 @@ C3 > C3
 "></textarea>
   </div>
   <button class="mybutton" onclick="loaddata()">LOAD DATA</button>
-  <button class="mybutton" onclick="loadsampledata()">LOAD SAMPLE DATA</button>
+  <button class="mybutton" onclick="loadsampledata()">LOAD SAMPLE DATA I</button>
+  <button class="mybutton" onclick="loadsampledata2()">LOAD SAMPLE DATA II</button>
+
   <button style="display:none" id="settingstoggler" class="mybutton" onclick="togglesettings();">SHOW CLASSES AND LAWS</button>
 
   <div id="settings" style="display: none;">
@@ -85,6 +90,7 @@ d u
   <!--<h2>Apply Chronological Sound Laws Backwards to your Input Sequences</h2>
 
   +++ coming soon +++-->
+  </div>
 </body>
 <script src="action.js"></script>
 
