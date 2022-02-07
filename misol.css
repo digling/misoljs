@@ -1,8 +1,13 @@
+.tabbed { 
+  padding: 20px;
+  margin: 20px;
+  background-color:lightyellow;
+}
 .sound {
   width: 20px;
   background-color: lightgray;
   border: 1px solid gray;
-  display: table-cell;
+  display: inherit;
   margin: 5px;
   padding: 5px;
   font-weight: bold;
@@ -11,7 +16,7 @@
 .unifiedsound {
   background-color: black;
   border: 1px dashed crimson;
-  display: table-cell;
+  display: inherit;
   padding: 2px;
   margin: 5px;
 }
@@ -32,6 +37,8 @@
   padding: 5px;
   margin: 5px;
   border: 1px solid black;
+  max-width: 300px;
+  overflow: hidden;
 }
 
 .basictable th {

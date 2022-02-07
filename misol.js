@@ -108,6 +108,9 @@ function parse_context(contextstring) {
   }
   var right, left;
   var matches = contextstring.match(/\s{0,1}@{1,1}([^\s]*):{1,1}([^\s]*)_\s{0,1}|\s{0,1}()_\s{0,1}/);
+  if (matches === null) {
+    console.log("NULL", contextstring);
+  }
   if (typeof matches[1] != "undefined") {
     var tier = matches[1];
     var sound = matches[2];
@@ -451,6 +454,15 @@ TIERS.tone = function(sequence){
   }
   return out;
 };
+
+TIERS.initial = function(sequence){
+  var ini = sequence[0];
+  var out = [];
+  sequence.forEach(function(elm){
+    out.push(ini);
+  });
+  return out;
+}
 
 
 
