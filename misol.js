@@ -10,6 +10,9 @@ const cartesianProduct = (...args) => args.reduce((a, b) => a.map(x => b.map(y =
 /* parse a sound law */
 function parse_law(lawstring){
   var law, context;
+  if (lawstring.indexOf("#") != -1) {
+    lawstring = lawstring.slice(0, lawstring.indexOf("#"));
+  }
   if (lawstring.indexOf(" / ") != -1) {
     [law, context] = lawstring.split(" / ");
   }
@@ -127,8 +130,9 @@ function parse_context(contextstring) {
 class SoundClasses {
   constructor (items, laws){
     /* parse the sound classes */
-    this.classes = {"^": ["^"], "$": ["$"], "-": ["-"]};
+    this.classes = {"^": ["^"], "$": ["$"], "-": ["-"], "?": ["?"]};
     this.sounds = {};
+    this.bwr_show = "perfect";
     var i, j, k, cls, sounds_, sounds, sound;
     for (i=0; i<items.length; i++) {
       [cls, sounds_] = items[i].split(" = ");
@@ -349,7 +353,9 @@ class SoundClasses {
       source = sequence["segments"][i];
       this_vector = [];
       for (j=0; tier=this.tiers[j]; j++) {
+        console.log(sequence);
         [label, pos, idx] = tier.split("_");
+        console.log(label, pos, idx);
         idx = parseInt(idx);
         if (pos == "right") {
           if (i+idx > length-1) {
@@ -364,6 +370,7 @@ class SoundClasses {
             segment = "^";
           }
           else {
+            consolelog(sequene, label);
             segment = sequence[label][(i-idx)];
           }
         }
@@ -403,8 +410,14 @@ class SoundClasses {
     var i, j;
     var recs = [];
     for (i=0; i<sequence.length; i++) {
-      recs.push(this.target2source[sequence[i]]);
+      if (typeof this.target2source[sequence[i]] != "undefined") {
+        recs.push(this.target2source[sequence[i]]);
+      }
+      else {
+        recs.push(["?"]);
+      }
     }
+    console.log(recs);
     var possibles = cartesianProduct(...recs);
     var selected = [];
     var this_sequence;
@@ -416,17 +429,22 @@ class SoundClasses {
       }
       /* reconstruct */
       proposal = this.achro_forward(this_sequence);
-      matched = true;
+      matched = [];
       for (j=0; j<proposal.length; j++) {
         if (proposal[j].length == 1 && proposal[j][0][0] == sequence[j]) {
+          matched.push(1)
         }
         else {
-          matched = false;
+          matched.push(0);
+          possibles[i][j] = "!"+possibles[i][j]
         }
       }
-      if (matched) {
+      if (matched.indexOf(0) == -1) {
         selected.push(possibles[i]);
       }
+    }
+    if (this.bwr_show == "imperfect"){
+      return possibles;
     }
     return selected;
   }
@@ -461,6 +479,7 @@ TIERS.initial = function(sequence){
   sequence.forEach(function(elm){
     out.push(ini);
   });
+  console.log("sequence", out);
   return out;
 }
 

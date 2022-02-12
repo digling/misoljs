@@ -6,7 +6,7 @@ function loaddata() {
 
   var sound_classes_in_text = document.getElementById("sound_classes").value.split("\n");
   var sound_laws_in_text = document.getElementById("sound_laws").value.split("\n");
-  var sound_laws = [];
+  var sound_laws = ["? > ?"];
   var sound_classes = [];
   sound_classes_in_text.forEach(function (element) {
     if (element.indexOf("=") != -1 && element[0] != "#") {
@@ -79,8 +79,10 @@ function backwards() {
   var count = 1;
   sequences.forEach(function(elm) {
     recs = CLS.achro_backward(elm, funcs);
-    if (recs[0].length == 0) {
-      recs = [["?"]];
+    if (recs.length == 0) {
+      txt += '<tr><td>'+count+'"</td><td>';
+      txt += '<span class="sound">'+elm.join('</span><span class="sound">')+"</span>";
+      txt += '</td><td><span style="color:red">?</span></td></tr>';
     }
     txt += "<tr>";
     for (i=0; i<recs.length; i++) {
@@ -95,7 +97,18 @@ function backwards() {
   txt += "</table>";
 
   document.getElementById("reconstructions_bw_out").innerHTML = txt;
+  highlight_errors()
 }
+
+function highlight_errors(){
+  var sounds = document.getElementsByClassName("sound");
+  for (i=0; i<sounds.length; i++) {
+    if (["?", "!"].indexOf(sounds[i].innerHTML[0]) != -1) {
+      sounds[i].style.border = "2px solid red";
+    }
+  }
+}
+
 
 function reconstruct() {
   document.getElementById("lawidxtoggler").style.display = "table-cell";
@@ -104,6 +117,8 @@ function reconstruct() {
   var tiers = [];
   var funcs = [];
   var sequences = [];
+  var desequences = {};
+  var s, t;
   var sequence, i, j, this_sequence;
   var elements;
   var td;
@@ -120,6 +135,13 @@ function reconstruct() {
     elements = element.split("\n");
     this_sequence = [];
     for (i=0; i<elements.length; i++) {
+      if (i == 0) {
+        if (elements[i].indexOf(" > ") != -1){
+          [s, t] = elements[i].split(" > ");
+          desequences[s] = t;
+          elements[i] = s;
+        }
+      }
       if (elements[i][0] != "#") {
         this_sequence.push(elements[i]);
       }
@@ -133,7 +155,11 @@ function reconstruct() {
     }
     sequences.push(sequence);
   });
-  var text = '<table class="basictable"><tr><th>Source</th><th>Target</th></tr>';
+  var text = '<table class="basictable"><tr><th>Source</th><th>Target</th>';
+  if (Object.keys(desequences).length != 0) {
+    text += "<th>Expected</th>";
+  }
+  text += "</tr>";
   var recs;
   var rec_dict;
   var tgt, idx;
@@ -170,11 +196,20 @@ function reconstruct() {
         td += rec_segs[0];
       }
     }
-    td += "</td></tr>";
+    td += "</td>";
+    if (Object.keys(desequences).length != 0) {
+      t = desequences[sequence["segments"].join(" ")];
+      if (typeof t == "undefined") {
+        t = "";
+      }
+      td += '<td><span class="sound">'+t.split(" ").join('</span><span class="sound">')+'</span></td>';
+    }
+    td += "</tr>";
     text += td;
   });
   text += "</table>";
   document.getElementById("reconstructions_out").innerHTML = text;
+  highlight_errors()
 }
 
 function togglesettings(){
@@ -209,4 +244,16 @@ function togglelawidxs(){
   else {
     lawidx.innerHTML = "SHOW LAW IDS";
   }
+}
+
+function toggle_bwr(node){
+  if (node.innerHTML == "SHOW IMPERFECT"){
+    node.innerHTML = "SHOW PERFECT";
+    CLS.bwr_show = "imperfect";
+  }
+  else {
+    node.innerHTML = "SHOW IMPERFECT";
+    CLS.bwr_show = "perfect";
+  }
+
 }
