@@ -50,7 +50,9 @@
       <div class="tabbed">
         <h3>Defining Sound Classes and Sound Laws</h3>
   We define sound classes for all sounds in our sample, to account for the common groupings used by linguists to mark sounds that share certain properties (similar to distinctive features, but more flexible). See the code examples on how features are defined. Note that individual sounds and all individual segments (e.g., also the equation mark) need to be segmented by a space to be recognized by the program. <br>
-  We define sound laws in the typical fashion used in historical linguistics, with the exception that we use a strict space separation to define sounds. In addition, we allow to address suprasegmental aspects of a sequence, which need to be defined by providing another tier that marks the respective suprasgemental aspect for each segment in your data by the construct <font style="font-family: monospace,monospace;">@TIER:VALUE</font> which precedes a sound class or a sound. With this construct, you can also mark the source sound which is supposed to be modified directly, as shown in our example.
+  We define sound laws in the typical fashion used in historical linguistics, with the exception that we use a strict space separation to define sounds. In addition, we allow to address suprasegmental aspects of a sequence, which need to be defined by providing another tier that marks the respective suprasgemental aspect for each segment in your data by the construct <font style="font-family: monospace,monospace;">@TIER[VALUE]</font> which precedes a sound class or a sound. With this construct, you can also mark the source sound which is supposed to be modified directly, as shown in our example.
+<br>
+Note that the dot is reserved as a specific symbol that indicates that two sounds were merged to mark an evolving unit. As a result, sound class names should not contain any dots. They can contain an underscore, but they cannot contain a whitespace. 
   <div style="display: flex">
     <textarea class="inputtext" cols="40" rows="10" id="sound_classes" placeholder="#insert your data here
 P = p pʰ b
@@ -63,10 +65,8 @@ TONE = ⁵⁵ ³⁵ ²¹⁴ ⁵¹
 V = a e i o u
 "></textarea>
     <textarea class="inputtext" cols="40" rows="10" id="sound_laws" placeholder="#insert your laws here
-C3 > C2 / @tone:²¹⁴_
-C3 > C1 / @tone:⁵⁵_
-C3 > C1 / @tone:⁵¹_
-C3 > C1 / @tone:³⁵_
+C3 > C2 / @tone[²¹⁴]_
+C3 > C1 / @tone[⁵⁵ ⁵¹ ³⁵]_
 C2 > C2
 C3 > C3
 "></textarea>

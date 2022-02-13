@@ -110,7 +110,7 @@ function parse_context(contextstring) {
     return [[], [], ["", ""]];
   }
   var right, left;
-  var matches = contextstring.match(/\s{0,1}@{1,1}([^\s]*):{1,1}([^\s]*)_\s{0,1}|\s{0,1}()_\s{0,1}/);
+  var matches = contextstring.match(/\s{0,1}@{1,1}([^\s]*)\[([^\]]*)\]_\s{0,1}|\s{0,1}()_\s{0,1}/);
   if (matches === null) {
     console.log("NULL", contextstring);
   }
@@ -122,7 +122,7 @@ function parse_context(contextstring) {
     var tier = "";
     var sound = "";
   }
-  [left, right] = contextstring.split(/\s{0,1}@{1,1}[^\s]*:{1,1}[^\s]*_\s{0,1}|\s{0,1}_\s{0,1}/);
+  [left, right] = contextstring.split(/\s{0,1}@{1,1}[^\s]*\[[^\]]*\]_\s{0,1}|\s{0,1}_\s{0,1}/);
   return [left, right, [tier, sound]];
 }
 
@@ -278,6 +278,7 @@ class SoundClasses {
     }
     /* we fill our dictionary for the tier values in the following */
     this.laws2tiers = {};
+    var tier_selfs;
     for (sound in this.laws) {
       this.all_laws[sound] = [];
       claw = this.laws[sound];
@@ -302,7 +303,16 @@ class SoundClasses {
           }
         }
         if (tier_self[0] != "") {
-          tier[tier_self[0]+"_self_0"] = this.classes[tier_self[1]];
+          tier[tier_self[0]+"_self_0"] = [];
+          tier_selfs = tier_self[1].split(" ");
+          for (j=0; j<tier_selfs.length; j++) {
+            for (k=0; k<this.classes[tier_selfs[j]].length; k++) {
+              tier[tier_self[0]+"_self_0"].push(this.classes[tier_selfs[j]][k]);
+            }
+          }
+          //tier[tier_self[0]+"_self_0"] = this.classes[tier_self[1]];
+          console.log("tierselfs", tier_selfs, tier[tier_self[0]+"_self_0"]);
+
         }
 
         for (j=0; j<this.tiers.length; j++) {
@@ -371,7 +381,7 @@ class SoundClasses {
             segment = "^";
           }
           else {
-            consolelog(sequene, label);
+            console.log(sequence, label);
             segment = sequence[label][(i-idx)];
           }
         }

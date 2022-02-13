@@ -50,7 +50,7 @@ function loaddata() {
 
 function loadsampledata() {
 
-  document.getElementById("sound_laws").value = "C1 > C1\nC3 > C2 / @tone:²¹⁴_\nC3 > C1 / @tone:⁵⁵_\nC3 > C1 / @tone:⁵¹_\nC3 > C1 / @tone:³⁵_\nC2 > C2\nV > V\nTONE > TONE\nRHYME > V V V";
+  document.getElementById("sound_laws").value = "C1 > C1\nC3 > C2 / @tone[²¹⁴]_\nC3 > C1 / @tone[⁵⁵]_\nC3 > C1 / @tone[⁵¹]_\nC3 > C1 / @tone[³⁵]_\nC2 > C2\nV > V\nTONE > TONE\nRHYME > V V V";
   document.getElementById("sound_classes").value = "P = p pʰ b\nK = k kʰ g\nT = t tʰ d\nC1 = p t k\nC2 = pʰ tʰ kʰ\nC3 = b d g\nTONE = ⁵⁵ ³⁵ ²¹⁴ ⁵¹\nV = a e i o u\nYIN = ⁵⁵ ³⁵ ⁵¹\nYANG = ²¹⁴\nGAP = - - -\nRHYMEP = a.p e.p i.p o.p u.p\nRHYMET = a.t e.t i.t o.t u.t\nRHYMEK = a.k e.k i.k o.k u.k\nRHYME = RHYMEP RHYMET RHYMEK";
   loaddata();
   document.getElementById("tiers").value = "segments\n@tone";
@@ -346,22 +346,22 @@ function read_file(event){
     }
     console.log(blocks);
     if ("CLASSES" in blocks){
-      document.getElementById("sound_classes").value = blocks["CLASSES"];
+      document.getElementById("sound_classes").value = blocks["CLASSES"].replace(/^\n*/, "").replace(/\n*$/, "");
     }
     if ("LAWS" in blocks){
-      document.getElementById("sound_laws").value = blocks["LAWS"];
+      document.getElementById("sound_laws").value = blocks["LAWS"].replace(/^\n*/, "").replace(/\n*$/, "");
     }
     if ("FORWARD" in blocks && "TIERS" in blocks["FORWARD"]) {
-      document.getElementById("tiers").value = blocks["FORWARD"]["TIERS"];
+      document.getElementById("tiers").value = blocks["FORWARD"]["TIERS"].replace(/^\n*/, "").replace(/\n*$/, "");
     }
     if ("FORWARD" in blocks && "WORDS" in blocks["FORWARD"]) {
-      document.getElementById("sequences").value = blocks["FORWARD"]["WORDS"];
+      document.getElementById("sequences").value = blocks["FORWARD"]["WORDS"].replace(/^\n*/, "").replace(/\n*$/, "");
     }
     if ("BACKWARD" in blocks && "TIERS" in blocks["BACKWARD"]) {
-      document.getElementById("tiersbw").value = blocks["BACKWARD"]["TIERS"];
+      document.getElementById("tiersbw").value = blocks["BACKWARD"]["TIERS"].replace(/^\n*/, "").replace(/\n*$/, "");
     }
     if ("BACKWARD" in blocks && "WORDS" in blocks["BACKWARD"]) {
-      document.getElementById("sequencesbw").value = blocks["BACKWARD"]["WORDS"];
+      document.getElementById("sequencesbw").value = blocks["BACKWARD"]["WORDS"].replace(/^\n*/, "").replace(/\n*$/, "");
     }
     var f = document.getElementById("fileloaded");
     f.style.display = "inline";
