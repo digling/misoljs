@@ -130,6 +130,7 @@ function parse_context(contextstring) {
 class SoundClasses {
   constructor (items, laws){
     /* parse the sound classes */
+    this.raw = {};
     this.classes = {"^": ["^"], "$": ["$"], "-": ["-"], "?": ["?"]};
     this.sounds = {};
     this.bwr_show = "perfect";

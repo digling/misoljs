@@ -200,9 +200,19 @@ function reconstruct() {
     if (Object.keys(desequences).length != 0) {
       t = desequences[sequence["segments"].join(" ")];
       if (typeof t == "undefined") {
-        t = "";
+        t = ["?"];
       }
-      td += '<td><span class="sound">'+t.split(" ").join('</span><span class="sound">')+'</span></td>';
+      else {
+        t = t.split(" ");
+        for (i=0; i<recs.length; i++) {
+
+          console.log("recs", recs, t);
+          if (recs[i][0][0] != t[i]) {
+            t[i] = "?"+t[i];
+          }
+        }
+      }
+      td += '<td><span class="sound">'+t.join('</span><span class="sound">')+'</span></td>';
     }
     td += "</tr>";
     text += td;
@@ -256,4 +266,29 @@ function toggle_bwr(node){
     CLS.bwr_show = "perfect";
   }
 
+}
+
+function export_data(){
+  var download = document.getElementById('download');
+  var text = "";
+  text +=  "# CLASSES\n\n"+document.getElementById("sound_classes").value;
+  text += "\n# LAWS\n\n"+ document.getElementById("sound_laws").value;
+  text += "\n# FORWARD\n\n## TIERS\n\n";
+  text += document.getElementById("tiers").value;
+  text += "\n\n## WORDS\n\n"
+  text += document.getElementById("sequences").value;
+  text += "\n# BACKWARD\n\n## TIERS\n\n";
+  text += document.getElementById("tiersbw").value;
+  text += "\n\n## WORDS\n\n"
+  text += document.getElementById("sequencesbw").value;
+
+  var dataset = document.getElementById("datasetid").value;
+  if (dataset.length == 0) {
+    dataset = "dummy";
+  }
+  download.setAttribute('href', 'data:text/csv;charset=utf-8,' + encodeURIComponent(text));
+  download.innerHTML = dataset+".txt";
+  download.style.backgroundColor = "lightgray";
+  download.style.color = "darkblue";
+  download.setAttribute('download', dataset+".txt");
 }
