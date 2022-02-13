@@ -106,7 +106,7 @@ d u
   </div>
   <button class="mybutton" onclick="reconstruct()">APPLY SOUND LAWS</button>
   <button style="display:none" id="lawidxtoggler" class="mybutton" onclick="togglelawidxs();">SHOW LAW IDS</button>
-  <div id="reconstructions" style="display: flex">
+  <div id="reconstructions" style="display: none">
     <div>
     <input type="text" placeholder="filter source" onkeydown="filter_data('reconstructions_out', 'source')" style="width:300px" />
     <input type="text" placeholder="filter target" onkeydown="filter_data('reconstructions_out', 'target')" style="width:300px" />
@@ -136,7 +136,7 @@ d u
   </div>
   <button class="mybutton" onclick="backwards()">FIND PROTO-FORMS</button>
   <button class="mybutton" onclick="toggle_bwr(this)">SHOW IMPERFECT</button>
-  <div id="reconstructions" style="display: flex">
+  <div id="reconstructions-bw" style="display: none">
       <div class="baseframe" id="reconstructions_bw_out"></div>
   </div>
   </div>
@@ -154,6 +154,9 @@ d u
           <button class="mybutton" onclick="export_data()">EXPORT DATA</button>
           <a href="" class="mybutton" id="download">DOWNLOAD</a>
         <h4>Import Your Data</h4>
+
+        <input type="file" accept="text/plain" onchange="read_file(event)" />
+        <button class="mybutton" style="background-color:lighgray;color:darkblue;display:none;" id="fileloaded" ></button>
 
 	  </div>
     </div>

@@ -294,3 +294,79 @@ function export_data(){
   download.style.color = "darkblue";
   download.setAttribute('download', dataset+".txt");
 }
+
+
+function read_file(event){
+  var input = event.target;
+  
+  var reg = new RegExp("\n|\r\n");
+  var reader = new FileReader();
+  reader.fileName = input.files[0].name;
+  reader.onload = function(){
+    var i;
+    var rows = reader.result.split(reg);
+    var blocks = {};
+    var active = "";
+    var activeb = "";
+    for (i=0; i<rows.length; i++) {
+      if (rows[i].indexOf("# CLASSES") == 0){
+        blocks["CLASSES"] = "";
+        active = "CLASSES";
+      }
+      else if (rows[i].indexOf("# LAWS") == 0){
+        blocks["LAWS"] = "";
+        active = "LAWS";
+      }
+      else if (rows[i].indexOf("# FORWARD") == 0){
+        active = "FORWARD";
+        activeb = "";
+        blocks[active] = {};
+      }
+      else if (rows[i].indexOf("# BACKWARD") == 0){
+        active = "BACKWARD";
+        activeb = "";
+        blocks[active] = {};
+      }
+      else if (rows[i].indexOf("## WORDS") == 0){
+        activeb = "WORDS";
+        blocks[active][activeb] = "";
+      }
+      else if (rows[i].indexOf("## TIERS") == 0){
+        activeb = "TIERS";
+        blocks[active][activeb] = "";
+      }
+      else {
+        if ((active == "LAWS" || active == "CLASSES")){
+          blocks[active] += rows[i]+"\n";
+        }
+        else if ((active == "FORWARD" || active == "BACKWARD") && activeb != ""){
+          blocks[active][activeb] += rows[i]+"\n";
+        }
+      }
+    }
+    console.log(blocks);
+    if ("CLASSES" in blocks){
+      document.getElementById("sound_classes").value = blocks["CLASSES"];
+    }
+    if ("LAWS" in blocks){
+      document.getElementById("sound_laws").value = blocks["LAWS"];
+    }
+    if ("FORWARD" in blocks && "TIERS" in blocks["FORWARD"]) {
+      document.getElementById("tiers").value = blocks["FORWARD"]["TIERS"];
+    }
+    if ("FORWARD" in blocks && "WORDS" in blocks["FORWARD"]) {
+      document.getElementById("sequences").value = blocks["FORWARD"]["WORDS"];
+    }
+    if ("BACKWARD" in blocks && "TIERS" in blocks["BACKWARD"]) {
+      document.getElementById("tiersbw").value = blocks["BACKWARD"]["TIERS"];
+    }
+    if ("BACKWARD" in blocks && "WORDS" in blocks["BACKWARD"]) {
+      document.getElementById("sequencesbw").value = blocks["BACKWARD"]["WORDS"];
+    }
+    var f = document.getElementById("fileloaded");
+    f.style.display = "inline";
+    f.style.backgroundColor = "lightgray";
+    f.innerHTML = reader.fileName;
+  };
+  reader.readAsText(input.files[0]);
+}
