@@ -107,8 +107,13 @@ d u
   <button class="mybutton" onclick="reconstruct()">APPLY SOUND LAWS</button>
   <button style="display:none" id="lawidxtoggler" class="mybutton" onclick="togglelawidxs();">SHOW LAW IDS</button>
   <div id="reconstructions" style="display: flex">
+    <div>
+    <input type="text" placeholder="filter source" onkeydown="filter_data('reconstructions_out', 'source')" style="width:300px" />
+    <input type="text" placeholder="filter target" onkeydown="filter_data('reconstructions_out', 'target')" style="width:300px" />
+
       <div class="baseframe" id="reconstructions_out"></div>
-  </div>
+    </div>
+    </div>
       </div>
 	  </div>
 	</li>

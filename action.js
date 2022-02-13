@@ -58,6 +58,7 @@ function loadsampledata() {
 }
 
 function backwards() {
+  document.getElementById("reconstructions-bw").style.display = "flex";
   var tiers_in_text = document.getElementById("tiersbw").value.split("\n");
   var funcs = [];
   tiers_in_text.forEach(function(element) {
@@ -112,6 +113,7 @@ function highlight_errors(){
 
 function reconstruct() {
   document.getElementById("lawidxtoggler").style.display = "table-cell";
+  document.getElementById("reconstructions").style.display = "flex";
   var tiers_in_text = document.getElementById("tiers").value.split("\n");
   var sequences_in_text = document.getElementById("sequences").value.split("\n\n");
   var tiers = [];
