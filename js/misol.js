@@ -27,6 +27,8 @@ function parse_law(lawstring){
 
 /* parse context */
 /* note that we need the space as a semantic marker here to remember the parsing process */
+/* when parsing, we should allow for nested structures, such that @tier[a b c]@[a b c] is parsed as 
+ * [ [ [ a b c ], [ a b c ] ] ], [ [ tier, segments ] ]
 function parse_rightleft_context(contextstring, classes){
   if (contextstring == "") {
     return [];
@@ -49,6 +51,7 @@ function parse_rightleft_context(contextstring, classes){
   var bracket_closed = false;
   for (i=0; chr=contextstring[i]; i++) {
     if (chr == "[") {
+      at = false;
       bracket = true;
       this_sound = "";
     }
@@ -72,6 +75,7 @@ function parse_rightleft_context(contextstring, classes){
       this_tier = "";
     }
     else if (chr == " ") {
+      console.log(this_sound, this_tier);
       if (bracket) {
         this_sound = this_sound+" ";
       }
@@ -86,9 +90,6 @@ function parse_rightleft_context(contextstring, classes){
           this_tier = "";
         }
       }
-    }
-    else if (chr == ":" && at) {
-      at = false;
     }
     else {
       if (bracket) {
@@ -105,6 +106,7 @@ function parse_rightleft_context(contextstring, classes){
   return [sounds, tiers];
 }
 
+/* TODO: add nested regexes by putting stuff in brackets and allowing to add multiple contexts, like @initial[abc]@tone[cde]_ or similar */
 function parse_context(contextstring) {
   if (contextstring == "") {
     return [[], [], ["", ""]];
@@ -513,18 +515,19 @@ function test(){
   ];
   
   var laws = [
-    "C1 > C2 / @tone:2_",
+    "C1 > C2 / @tone[2]_",
     "p > b / V _ V k",
     "i > i",
     "V > V",
     "VV > VV",
-    "k > g / V @tone:2_",
+    "k > g / V @tone[2]_",
     "r > r.e / _ $",
     "a > a: / _ $",
     "t > d / ^ _",
   ];
   
   var cls = new SoundClasses(items, laws);
+
   
   var context = "C2 [a e i o u] [o e] _";
   [right, left] = parse_context(context);
@@ -539,14 +542,20 @@ function test(){
   
   console.log(cls.laws["p"][0]);
   cls.assemble_laws();
-  console.log(cls.all_laws["k"]);
-  console.log(cls.all_laws["r"][0]);
+  //console.log(cls.all_laws["k"]);
+  //console.log(cls.all_laws["r"][0]);
   
   console.log(cls.tiers);
-  console.log(cls.laws["i"]);
+  //console.log(cls.laws["i"]);
   console.log(cls.achro_forward({"segments": ["t", "a"], "tone": ["2", "2"]}));
   console.log(cls.achro_forward({"segments": ["q", "a"], "tone": ["2", "2"]}));
 
+  out2 = parse_rightleft_context("@initial[p t k] P", cls.classes);
+  console.log(out2);
+  out2 = parse_rightleft_context("@[p t k]@initial[k p d] P", cls.classes);
+  console.log(out2);
+
+
 }
 
-//test()
+test()
