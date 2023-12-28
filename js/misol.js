@@ -150,7 +150,7 @@ function parse_rightleft_context(contextstring, classes){
     contextstring = contextstring + " ";
   }
   var bracket_closed = false;
-  for (i=0; i < contextstring.length; i++) {
+  for (i = 0; i < contextstring.length; i += 1) {
     chr = contextstring[i];
     if (chr === "[") {
       at = false;
@@ -166,8 +166,8 @@ function parse_rightleft_context(contextstring, classes){
       bracket_closed = true;
       current_sounds = this_sound.split(" ");
       this_sound = [];
-      for (j=0; j<current_sounds.length; j++) {
-        for (k=0; k<classes[current_sounds[j]].length; k++) {
+      for (j = 0; j < current_sounds.length; j += 1) {
+        for (k = 0; k < classes[current_sounds[j]].length; k += 1) {
           this_sound.push(classes[current_sounds[j]][k]);
         }
       }
@@ -305,8 +305,11 @@ class SoundClasses {
         for (j = 0; j < sources.length; j += 1) {
           [source, target] = [sources[j], targets[j]];
           [left, right, self_tier] = parse_context(context);
+          /* reverse the left context */
           if (left != "") {
             before = parse_rightleft_context(left, this.classes);
+            before[0] = before[0].reverse();
+            before[1] = before[1].reverse(); 
           }
           else {
             before = [[], []];
@@ -337,7 +340,7 @@ class SoundClasses {
     var tier;
     this.tiers = [];
     for (sound in this.laws) {
-      for (i=0; i<this.laws[sound].length; i++) {
+      for (i = 0; i < this.laws[sound].length; i += 1) {
         /* add the tier information */
         for (j=0; j<this.laws[sound][i][2].length; j++) {
           tier = this.laws[sound][i][2][j];
@@ -351,7 +354,7 @@ class SoundClasses {
             this.tiers.push(tier);
           }
         }
-        for (j=0; j<this.laws[sound][i][5].length; j++) {
+        for (j = 0; j < this.laws[sound][i][5].length; j += 1) {
           tier = this.laws[sound][i][5][j];
           if (tier == "") {
             tier = "segments_right_"+(j+1);
@@ -385,7 +388,7 @@ class SoundClasses {
       idxs.push(-maxA);
     }
     idxs.push(0);
-    for (i=1; i<maxB+1; i++) {
+    for (i = 1; i < maxB + 1; i += 1) {
       idxs.push(i);
     }
     /* we fill our dictionary for the tier values in the following */
@@ -394,40 +397,39 @@ class SoundClasses {
     for (sound in this.laws) {
       this.all_laws[sound] = [];
       claw = this.laws[sound];
-      for (i=0; i<claw.length; i++) {
+      for (i = 0; i < claw.length; i += 1) {
         [target, left, tier_left, tier_self, right, tier_right, idx] = claw[i];
         tier = {"source": sound, "target": target, "id": idx};
         /* assign the tier information from our index here, this means, we need to trace the name spaces we used here */
-        for (j=left.length-1; j>=0; j--) {
+        for (j = left.length - 1; j >= 0; j -= 1) {
           if (tier_left[j] == "") {
-            tier["segments_left_"+(j+1)] = left[j];
+            tier["segments_left_" + (j + 1)] = left[j];
           }
           else {
-            tier[tier_left[j]+"_left_"+(j+1)] = left[j];
+            tier[tier_left[j]+"_left_"+(j + 1)] = left[j];
           }
         }
-        for (j=0; j<right.length; j++) {
+        for (j = 0; j < right.length; j += 1) {
           if (tier_right[j] == "") {
-            tier["segments_right_"+(j+1)] = right[j];
+            tier["segments_right_" + (j + 1)] = right[j];
           }
           else {
-            tier[tier_right[j]+"_right_"+(j+1)] = right[j];
+            tier[tier_right[j] + "_right_" + (j + 1)] = right[j];
           }
         }
         if (tier_self[0] != "") {
-          tier[tier_self[0]+"_self_0"] = [];
+          tier[tier_self[0] + "_self_0"] = [];
           tier_selfs = tier_self[1].split(" ");
-          for (j=0; j<tier_selfs.length; j++) {
-            for (k=0; k<this.classes[tier_selfs[j]].length; k++) {
+          for (j = 0; j < tier_selfs.length; j += 1) {
+            for (k = 0; k < this.classes[tier_selfs[j]].length; k += 1) {
               tier[tier_self[0]+"_self_0"].push(this.classes[tier_selfs[j]][k]);
             }
           }
           //tier[tier_self[0]+"_self_0"] = this.classes[tier_self[1]];
-          console.log("tierselfs", tier_selfs, tier[tier_self[0]+"_self_0"]);
-
+          //console.log("tierselfs", tier_selfs, tier[tier_self[0]+"_self_0"]);
         }
 
-        for (j=0; j<this.tiers.length; j++) {
+        for (j = 0; j < this.tiers.length; j += 1) {
           if (!(this.tiers[j] in tier)) {
             tier[this.tiers[j]] = ["Ø"];
           }
@@ -472,29 +474,35 @@ class SoundClasses {
     var val;
     var output = [];
 
-    for (i = 0; i < length; i ++) {
+    for (i = 0; i < length; i += 1) {
       source = sequence["segments"][i];
       this_vector = [];
       for (j = 0; tier = this.tiers[j]; j ++) {
         console.log(sequence);
         [label, pos, idx] = tier.split("_");
-        console.log(label, pos, idx);
+        // console.log(label, pos, idx);
         idx = parseInt(idx);
         if (pos == "right") {
-          if (i + idx > length - 1) {
+          if (i + idx == length) {
             segment = "$";
           }
+          else if (i + idx > length) {
+            segment = "Ø";
+          }
           else {
-            segment = sequence[label][(i+idx)];
+            segment = sequence[label][(i + idx)];
           }
         }
         else if (pos == "left") {
-          if (i - idx < 0) {
+          if (i - idx == -1) {
             segment = "^";
+          }
+          else if (i - idx < -1) {
+            segment = "Ø";
           }
           else {
             console.log(sequence, label);
-            segment = sequence[label][(i-idx)];
+            segment = sequence[label][(i - idx)];
           }
         }
         else if (pos == "self") {
@@ -502,13 +510,15 @@ class SoundClasses {
         }
         this_vector.push(segment);
       }
+      console.log(this_vector);
       /* now search through all tiers with this sound as source */
       recs = [];
       try {
-        for (j = 0; j < this.all_laws[source].length; j ++) {
+        for (j = 0; j < this.all_laws[source].length; j += 1) {
           matched = true;
-          for (k = 0; k < this.tiers.length; k ++) {
+          for (k = 0; k < this.tiers.length; k += 1) {
             val = this.all_laws[source][j][this.tiers[k]];
+            console.log("source", this.tiers[k], source, val, this.all_laws[source], this_vector[k]);
             if (val.indexOf(this_vector[k]) == -1 && val.indexOf("Ø") == -1) {
               matched = false;
               break;
@@ -602,7 +612,7 @@ TIERS.initial = function(sequence){
   sequence.forEach(function(elm){
     out.push(ini);
   });
-  console.log("sequence", out);
+  //console.log("sequence", out);
   return out;
 }
 
