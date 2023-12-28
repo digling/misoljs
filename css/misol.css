@@ -14,8 +14,9 @@
 }
 
 .unifiedsound {
-  background-color: black;
-  border: 1px dashed crimson;
+  background-color: lightblue;
+  border: 1px dashed black;
+  border-radius: 10px;
   display: inherit;
   padding: 2px;
   margin: 5px;

@@ -1,3 +1,5 @@
+// noinspection RegExpRedundantEscape
+
 /**
  * Major functions to handle sound change with multi-tiers.
  * **/
@@ -6,14 +8,114 @@
 const cartesianProduct = (...args) => args.reduce((a, b) => a.map(x => b.map(y => x.concat([y]))).reduce((acc, t) => acc.concat(t), []) , [[]])
 
 
+function parse_law_string(law_string) {
+  var inBracket = false;
+  var inSequence = false;
+  var i, sg;
+  var out = [];
+  for (i = 0; i < law_string.length; i += 1) {
+    sg = law_string[i];
+    if (sg == "[") {
+      inBracket = true;
+      out.push("");
+    }
+    else if (sg == "]") {
+      inBracket = false;
+    }
+    else if (sg == " "){
+      if (inBracket) {
+        out[out.length-1] += sg;
+      }
+      else {
+        inSequence = false;  
+      }
+    }
+    else {
+      if (inBracket) {
+        out[out.length - 1] += sg;
+      }
+      else if (inSequence) {
+        out[out.length - 1] += sg;
+      }
+      else if (!inSequence) {
+        out.push(sg);
+        inSequence = true;
+      }
+    }
+  }
+  var sounds = [];
+  out.forEach(element => sounds.push(element.trim().split(/\s+/g)));
+  return sounds;
+}
+/* parse a sound law */
+function parse_laws(lawstring){
+  var law, context, i, j;
+  if (lawstring.indexOf("#") !== -1) {
+    lawstring = lawstring.slice(0, lawstring.indexOf("#"));
+  }
+  /* parse the context to get started */
+  if (lawstring.indexOf(" / ") !== -1) {
+    [law, context] = lawstring.split(" / ");
+  }
+  else {
+    law = lawstring;
+    context = "";
+  }
+  var sources, targets;
+  var before, after, context_string, new_context;
+  [sources, targets] = law.split(' > ');
+
+  [sources, targets]  = [parse_law_string(sources), parse_law_string(targets)]; 
+  var laws = [];
+  var source_slice;
+  for (i = 0; i < sources.length; i += 1) {
+    [before, after] = [[], []];
+    source_slice = sources.slice(0, i);
+    for (j = 0; j < source_slice.length; j += 1) {
+      if (source_slice[j].length > 1){
+        before.push("[" + source_slice[j].join(" ") + "]");
+      }
+      else {
+        before.push(source_slice[j][0]);
+      }
+    }
+    before = before.join(" ");
+    
+    source_slice = sources.slice(i + 1, sources.length);
+    for (j = 0; j < source_slice.length; j += 1) {
+      if (source_slice[j].length > 1) {
+        after.push("[" + source_slice[j].join(" ") + "]");
+      }
+      else {
+        after.push(source_slice[j]);
+      }
+    }
+    after = after.join(" ");
+    if (before || after) {
+      context_string = [before, "_", after].join(" ").trim();
+    }
+    else {
+      context_string = "_";
+    }
+    if (context) {
+      new_context = context.replace("_", context_string);
+    }
+    else {
+      new_context = context_string;
+    }
+    laws.push([sources[i].join(" "), targets[i].join(" "), new_context]);
+  }
+  return laws;
+}
+
 
 /* parse a sound law */
 function parse_law(lawstring){
   var law, context;
-  if (lawstring.indexOf("#") != -1) {
+  if (lawstring.indexOf("#") !== -1) {
     lawstring = lawstring.slice(0, lawstring.indexOf("#"));
   }
-  if (lawstring.indexOf(" / ") != -1) {
+  if (lawstring.indexOf(" / ") !== -1) {
     [law, context] = lawstring.split(" / ");
   }
   else {
@@ -29,37 +131,37 @@ function parse_law(lawstring){
 /* note that we need the space as a semantic marker here to remember the parsing process */
 /* when parsing, we should allow for nested structures, such that @tier[a b c]@[a b c] is parsed as 
  * [ [ [ a b c ], [ a b c ] ] ], [ [ tier, segments ] ]
+ * */
 function parse_rightleft_context(contextstring, classes){
-  if (contextstring == "") {
+  if (contextstring === "") {
     return [];
   }
   var bracket = false;
   var at = false;
-  var space = false;
   var i, chr;
-  var j, sound_in_class, current_sounds;
+  var j, current_sounds;
   var sounds = [];
   var tiers = [];
 
   var this_sound = '';
   var this_tier = '';
-  var current_sound;
   /* add space to context string */
-  if (contextstring[contextstring.length-1] != "]") {
+  if (contextstring[contextstring.length-1] !== "]") {
     contextstring = contextstring + " ";
   }
   var bracket_closed = false;
-  for (i=0; chr=contextstring[i]; i++) {
-    if (chr == "[") {
+  for (i=0; i < contextstring.length; i++) {
+    chr = contextstring[i];
+    if (chr === "[") {
       at = false;
       bracket = true;
       this_sound = "";
     }
-    else if (chr == "@") {
+    else if (chr === "@") {
       at = true;
       this_tier = '';
     }
-    else if (chr == "]") {
+    else if (chr === "]") {
       bracket = false;
       bracket_closed = true;
       current_sounds = this_sound.split(" ");
@@ -74,7 +176,7 @@ function parse_rightleft_context(contextstring, classes){
       this_sound = "";
       this_tier = "";
     }
-    else if (chr == " ") {
+    else if (chr === " ") {
       console.log(this_sound, this_tier);
       if (bracket) {
         this_sound = this_sound+" ";
@@ -108,21 +210,24 @@ function parse_rightleft_context(contextstring, classes){
 
 /* TODO: add nested regexes by putting stuff in brackets and allowing to add multiple contexts, like @initial[abc]@tone[cde]_ or similar */
 function parse_context(contextstring) {
-  if (contextstring == "") {
+  if (contextstring === "") {
     return [[], [], ["", ""]];
   }
-  var right, left;
-  var matches = contextstring.match(/\s{0,1}@{1,1}([^\s]*)\[([^\]]*)\]_\s{0,1}|\s{0,1}()_\s{0,1}/);
+  var right, left, tier, sound;
+  // noinspection RegExpRedundantEscape
+  var matches;
+  // noinspection RegExpRedundantEscape,RegExpSimplifiable
+  matches = contextstring.match(/\s{0,1}@{1,1}([^\s]*)\[([^\]]*)\]_\s{0,1}|\s{0,1}()_\s{0,1}/);
   if (matches === null) {
     console.log("NULL", contextstring);
   }
   if (typeof matches[1] != "undefined") {
-    var tier = matches[1];
-    var sound = matches[2];
+    tier = matches[1];
+    sound = matches[2];
   }
   else {
-    var tier = "";
-    var sound = "";
+    tier = "";
+    sound = "";
   }
   [left, right] = contextstring.split(/\s{0,1}@{1,1}[^\s]*\[[^\]]*\]_\s{0,1}|\s{0,1}_\s{0,1}/);
   return [left, right, [tier, sound]];
@@ -141,7 +246,8 @@ class SoundClasses {
       [cls, sounds_] = items[i].split(" = ");
       sounds_ = sounds_.split(" ");
       sounds = [];
-      for (j=0; sound=sounds_[j]; j++) {
+      for (j=0; j < sounds_.length; j++) {
+        sound = sounds_[j];
         if (sound in this.classes){
           for (k=0; k<this.classes[sound].length; k++) {
             sounds.push(this.classes[sound][k]);
@@ -176,43 +282,47 @@ class SoundClasses {
     this.raw_laws = {};
     var snd, elm;
     var ctxts;
-    for (i=0; law=laws[i]; i++) {
-      this.raw_laws[i+1] = law;
-      [source, target, context] = parse_law(law);
-      sources = [];
-      targets = [];
-      source = source.split(" ");
-      target = target.split(" ");
-      for (j=0; elm=source[j]; j++) {
-        sources = sources.concat(this.classes[elm]);
-      }
-      for (j=0; elm=target[j]; j++) {
-        targets = targets.concat(this.classes[elm]);
-      }
-      //[sources, targets] = [this.classes[source], this.classes[target]];
-      if (sources.length != targets.length) {
-        alert("source and target have different lengths in law"+i);
-      }
-      for (j=0; j<sources.length; j++) {
-        [source, target] = [sources[j], targets[j]];
-        [left, right, self_tier] = parse_context(context);
-        if (left != "") {
-          before = parse_rightleft_context(left, this.classes);
+    var all_laws;
+    for (i = 0; law = laws[i]; i += 1) {
+      this.raw_laws[i + 1] = law;
+      all_laws = parse_laws(law);
+      for (k = 0; k < all_laws.length; k += 1) {
+        [source, target, context] = all_laws[k];
+        sources = [];
+        targets = [];
+        source = source.split(" ");
+        target = target.split(" ");
+        for (j = 0; elm = source[j]; j += 1) {
+          sources = sources.concat(this.classes[elm]);
         }
-        else {
-          before = [[], []];
+        for (j = 0; elm = target[j]; j += 1) {
+          targets = targets.concat(this.classes[elm]);
         }
-        if (right != "") {
-          after = parse_rightleft_context(right, this.classes);
+        //[sources, targets] = [this.classes[source], this.classes[target]];
+        if (sources.length != targets.length) {
+          alert("source and target have different lengths in law"+i);
         }
-        else {
-          after = [[], []];
-        }
-        if (source in this.laws) {
-          this.laws[source].push([target, before[0], before[1], self_tier, after[0], after[1], i+1]);
-        }
-        else {
-          this.laws[source] = [[target, before[0], before[1], self_tier, after[0], after[1], i+1]];
+        for (j = 0; j < sources.length; j += 1) {
+          [source, target] = [sources[j], targets[j]];
+          [left, right, self_tier] = parse_context(context);
+          if (left != "") {
+            before = parse_rightleft_context(left, this.classes);
+          }
+          else {
+            before = [[], []];
+          }
+          if (right != "") {
+            after = parse_rightleft_context(right, this.classes);
+          }
+          else {
+            after = [[], []];
+          }
+          if (source in this.laws) {
+            this.laws[source].push([target, before[0], before[1], self_tier, after[0], after[1], i+1]);
+          }
+          else {
+            this.laws[source] = [[target, before[0], before[1], self_tier, after[0], after[1], i+1]];
+          }
         }
       }
     }
@@ -253,8 +363,8 @@ class SoundClasses {
             this.tiers.push(tier);
           }
         }
-        if (this.laws[sound][i][3][0] != "") {
-          if (this.tiers.indexOf(this.laws[sound][i][3][0]+"_self_0") == -1) {
+        if (this.laws[sound][i][3][0] !== "") {
+          if (this.tiers.indexOf(this.laws[sound][i][3][0]+"_self_0") === -1) {
             this.tiers.push(this.laws[sound][i][3][0]+"_self_0");
           }
         }
@@ -362,16 +472,16 @@ class SoundClasses {
     var val;
     var output = [];
 
-    for (i=0; i<length; i++) {
+    for (i = 0; i < length; i ++) {
       source = sequence["segments"][i];
       this_vector = [];
-      for (j=0; tier=this.tiers[j]; j++) {
+      for (j = 0; tier = this.tiers[j]; j ++) {
         console.log(sequence);
         [label, pos, idx] = tier.split("_");
         console.log(label, pos, idx);
         idx = parseInt(idx);
         if (pos == "right") {
-          if (i+idx > length-1) {
+          if (i + idx > length - 1) {
             segment = "$";
           }
           else {
@@ -379,7 +489,7 @@ class SoundClasses {
           }
         }
         else if (pos == "left") {
-          if (i-idx < 0) {
+          if (i - idx < 0) {
             segment = "^";
           }
           else {
@@ -395,9 +505,9 @@ class SoundClasses {
       /* now search through all tiers with this sound as source */
       recs = [];
       try {
-        for (j=0; j<this.all_laws[source].length; j++) {
+        for (j = 0; j < this.all_laws[source].length; j ++) {
           matched = true;
-          for (k=0; k<this.tiers.length; k++) {
+          for (k = 0; k < this.tiers.length; k ++) {
             val = this.all_laws[source][j][this.tiers[k]];
             if (val.indexOf(this_vector[k]) == -1 && val.indexOf("Ø") == -1) {
               matched = false;
@@ -413,7 +523,7 @@ class SoundClasses {
         }
       }
       catch {
-        recs = [['!'+source, 0]]
+        recs = [['!' + source, 0]]
       }
       output.push(recs);
     }
@@ -422,7 +532,7 @@ class SoundClasses {
   achro_backward (sequence, funcs) {
     var i, j;
     var recs = [];
-    for (i=0; i<sequence.length; i++) {
+    for (i = 0; i < sequence.length; i ++) {
       if (typeof this.target2source[sequence[i]] != "undefined") {
         recs.push(this.target2source[sequence[i]]);
       }
@@ -435,15 +545,15 @@ class SoundClasses {
     var selected = [];
     var this_sequence;
     var proposal, matched;
-    for (i=0; i<possibles.length; i++) {
+    for (i = 0; i < possibles.length; i ++) {
       this_sequence = {"segments": possibles[i]};
-      for (j=0; j<funcs.length; j++) {
+      for (j = 0; j < funcs.length; j ++) {
         this_sequence[funcs[j]] = TIERS[funcs[j]](possibles[i]);
       }
       /* reconstruct */
       proposal = this.achro_forward(this_sequence);
       matched = [];
-      for (j=0; j<proposal.length; j++) {
+      for (j = 0; j < proposal.length; j ++) {
         if (proposal[j].length == 1 && proposal[j][0][0] == sequence[j]) {
           matched.push(1)
         }
@@ -495,6 +605,46 @@ TIERS.initial = function(sequence){
   console.log("sequence", out);
   return out;
 }
+
+TIERS.nasal = function(sequence){
+  var out = [];
+  var i;
+  var nasal = "0";
+  for (i=0; i<sequence.length; i++) {
+    if ("ñmŋȵɳɲɴ".indexOf(sequence[i]) != -1) {
+      nasal = "1";
+    }
+  }
+  sequence.forEach(function(elm){
+    out.push(nasal);
+  });
+  return out;
+};
+
+TIERS.stress = function(sequence){
+  var i, segment;
+  var out = [];
+  var stressed = false;
+  var was_stressed = false;
+  for (i=0; segment=sequence[i]; i++) {
+    if (segment[0] == "ˈ") {
+      stressed = true;
+      was_stressed = true;
+      out.push("2");
+    }
+    else if (segment[segment.length-1] == "ˈ") {
+      stressed = false;
+      out.push("2");
+    }
+    else if (was_stressed) {
+      out.push("1");
+    }
+    else {
+      out.push("0");
+    }
+  }
+  return out;
+};
 
 
 
@@ -559,3 +709,32 @@ function test(){
 }
 
 test()
+
+var test = [
+  "a > b / _ x", 
+  "a n > ə - / _ x",
+  "[a b] > [c d] / _ x"
+];
+
+
+console.log(parse_law_string("[a b cd] [a b]"));
+console.log(parse_law_string("a  b [ c  d ]"));
+console.log(parse_law_string("a [ c  d ] c"));
+console.log(parse_law_string("a"));
+console.log(parse_law_string("[a  b  ] [ a b]"));
+
+tests = [
+  "a > b / _ $",
+  "a b > c d",
+  "[a b] > [c d]",
+  "[a e] n > ə - / [a b c] _ x"
+];
+
+for (i = 0; i < tests.length; i += 1) {
+  test = tests[i];
+  console.log(test);
+  var laws = parse_laws(test);
+  for (j = 0; j < laws.length; j += 1) {
+    console.log(laws[j]);
+  }
+}
