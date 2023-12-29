@@ -345,10 +345,10 @@ class SoundClasses {
         for (j=0; j<this.laws[sound][i][2].length; j++) {
           tier = this.laws[sound][i][2][j];
           if (tier == "") {
-            tier = "segments_left_"+(j+1);
+            tier = "segments_left_" + (j + 1);
           }
           else {
-            tier = tier+"_left_"+(j+1);
+            tier = tier+"_left_" + (j + 1);
           }
           if (this.tiers.indexOf(tier) == -1) {
             this.tiers.push(tier);
@@ -357,10 +357,10 @@ class SoundClasses {
         for (j = 0; j < this.laws[sound][i][5].length; j += 1) {
           tier = this.laws[sound][i][5][j];
           if (tier == "") {
-            tier = "segments_right_"+(j+1);
+            tier = "segments_right_" + (j + 1);
           }
           else {
-            tier = tier+"_right_"+(j+1);
+            tier = tier+"_right_" + (j + 1);
           }
           if (this.tiers.indexOf(tier) == -1) {
             this.tiers.push(tier);
@@ -383,6 +383,7 @@ class SoundClasses {
     /* now that we have learned all tiers, we can assemble them for each sound */
     var idxs = [];
     var tier_right, tier_left, tier_self, idx;
+    var right_val, left_val;
     
     for (i=maxA; i>0; i--) {
       idxs.push(-maxA);
@@ -402,19 +403,32 @@ class SoundClasses {
         tier = {"source": sound, "target": target, "id": idx};
         /* assign the tier information from our index here, this means, we need to trace the name spaces we used here */
         for (j = left.length - 1; j >= 0; j -= 1) {
-          if (tier_left[j] == "") {
-            tier["segments_left_" + (j + 1)] = left[j];
+          if (typeof left[j] == "undefined") {
+            left_val = "Ø";
           }
           else {
-            tier[tier_left[j]+"_left_"+(j + 1)] = left[j];
+            left_val = left[j];
+          }
+
+          if (tier_left[j] == "") {
+            tier["segments_left_" + (j + 1)] = left_val;
+          }
+          else {
+            tier[tier_left[j]+"_left_"+(j + 1)] = left_val;
           }
         }
         for (j = 0; j < right.length; j += 1) {
-          if (tier_right[j] == "") {
-            tier["segments_right_" + (j + 1)] = right[j];
+          if (typeof right[j] == "undefined") {
+            right_val = "Ø";
           }
           else {
-            tier[tier_right[j] + "_right_" + (j + 1)] = right[j];
+            right_val = right[j];
+          }
+          if (tier_right[j] == "") {
+            tier["segments_right_" + (j + 1)] = right_val;
+          }
+          else {
+            tier[tier_right[j] + "_right_" + (j + 1)] = right_val;
           }
         }
         if (tier_self[0] != "") {
