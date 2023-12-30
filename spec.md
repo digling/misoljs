@@ -1,7 +1,5 @@
-<style>
-.mycode {background-color: lightgray;}
-</style>
-
+<div><style> .mycode {background-color: lightgray;} </style> </div>
+ 
 # Multi-Tiered Sound Laws in MISOL: Specification
 
 ## Components
