@@ -28,6 +28,7 @@
       <label for="tabreiter-0-2">Forward</label>
       <label for="tabreiter-0-3">Backward</label>
       <label for="tabreiter-0-4">Import and Export</label>
+      <label for="tabreiter-0-5">Help</label>
     </div>
   </div>
   <h2></h2>
@@ -44,9 +45,10 @@
         <img src="img/misol.png" style="width:200px;display:float;" />
         <br>
         <b>How to cite:</b><br>
-        <div style="background-color:aliceblue;padding:5px;border-radius:5px;border:1px dotted gray;">List, Johann-Mattis (2022): <i>MISoL: Modeling and Inferring Sound Laws with an Interactive Web-Application [Version 0.1.0].</i> Leipzig: Max Planck Institute for Evolutionary Anthropology. <a href="https://lingpy.org/misol/">https://lingpy.org/misol/</a>.</div>
+        <div style="background-color:aliceblue;padding:5px;border-radius:5px;border:1px dotted gray;">List, Johann-Mattis (2023): <i>MISoL: Modeling and Inferring Sound Laws with an Interactive Web-Application [Software Tool: Version 0.2].</i>Passau: Chair of Multilingual Computational Linguistics at the University of Passau. <a href="https://lingpy.org/misol/">https://lingpy.org/misol/</a>.</div>
 
 	  </div>
+    <div class="footer"></div>
     </div>
 	</li>
 	<li class="reiter">
@@ -54,11 +56,8 @@
 	  <label class="main" for="tabreiter-0-1">Classes and Laws</label>
 	  <div>
       <div class="tabbed">
-        <h3>Defining Sound Classes and Sound Laws</h3>
-  We define sound classes for all sounds in our sample, to account for the common groupings used by linguists to mark sounds that share certain properties (similar to distinctive features, but more flexible). See the code examples on how features are defined. Note that individual sounds and all individual segments (e.g., also the equation mark) need to be segmented by a space to be recognized by the program. <br>
-  We define sound laws in the typical fashion used in historical linguistics, with the exception that we use a strict space separation to define sounds. In addition, we allow to address suprasegmental aspects of a sequence, which need to be defined by providing another tier that marks the respective suprasgemental aspect for each segment in your data by the construct <font style="font-family: monospace,monospace;">@TIER[VALUE]</font> which precedes a sound class or a sound. With this construct, you can also mark the source sound which is supposed to be modified directly, as shown in our example.
-<br>
-Note that the dot is reserved as a specific symbol that indicates that two sounds were merged to mark an evolving unit. As a result, sound class names should not contain any dots. They can contain an underscore, but they cannot contain a whitespace. 
+        <h3>Sound Classes and Sound Laws</h3>
+ 
   <div style="display: flex">
     <textarea class="inputtext" cols="40" rows="10" id="sound_classes" placeholder="#insert your data here
 P = p pʰ b
@@ -88,6 +87,7 @@ C3 > C3
       <div class="baseframe" id="sound_laws_out"></div>
   </div>
       </div>
+      <div class="footer"></div>
 	  </div>
 	</li>
 	<li class="reiter">
@@ -96,7 +96,6 @@ C3 > C3
 	  <div>
       <div class="tabbed">
         <h3>Forward Reconstruction</h3>
-  Reconstruction here uses anachronical sound laws which are applied to each segment of a sequence without taking into account that the application of a sound law might result in the modification of the sequence itself. Anachronical sound laws are a very powerful analytical step that helps to identify chronological sound laws properly. While you can provide direct suprasegmental information by adding multi-tiered sequences, we provide some basic functions by which these tiers can be computed. If you want to make use of these functions that take a sequence as input and ield a tier as output that is passed to the algorith, your tier-name needs to be identical with the function and preceded by an @ symbol, such as, e.g., @tone in our example.
   <div style="display: flex">
     <textarea class="inputtext" cols="40" rows="5" id="tiers" placeholder="# insert your tiers here, one per line
 segments
@@ -114,13 +113,14 @@ d u
   <button style="display:none" id="lawidxtoggler" class="mybutton" onclick="togglelawidxs();">SHOW LAW IDS</button>
   <div id="reconstructions" style="display: none">
     <div>
-    <input type="text" placeholder="filter source" onkeydown="filter_data('reconstructions_out', 'source')" style="width:300px" />
-    <input type="text" placeholder="filter target" onkeydown="filter_data('reconstructions_out', 'target')" style="width:300px" />
+    <input type="text" placeholder="filter source" onkeyup="filter_data(this, 'reconstructions_out', 0)" style="width:300px" />
+    <input type="text" placeholder="filter target" onkeyup="filter_data(this, 'reconstructions_out', 1)" style="width:300px" />
 
       <div class="baseframe" id="reconstructions_out"></div>
     </div>
     </div>
       </div>
+      <div class="footer"></div>
 	  </div>
 	</li>
 	<li class="reiter">
@@ -129,7 +129,6 @@ d u
 	  <div>
       <div class="tabbed">
         <h3>Backward Reconstruction</h3>
-  Our backwards reconstruction starts from a target word in the language and then goes upwards to identify the sequences in the proto-language that could have accounted for this string. This requires some adjustments regarding your sound laws, since it is difficult to predict elements which have disappared, so you should adjust the laws in such a way that you avoid sound laws involving a loss of an element but instead model these as the modification of two elements in the ancestral language that become one element in the target language. Once this is accounted for, you can safely apply our procedure, which first identifies all possible source sounds, then takes the cartesian product to create all possible words from these sound combinations, and finally evaluates all of the word against the sound changes to see if these are possible.
 
   <div style="display: flex">
     <textarea class="inputtext" cols="40" rows="5" id="tiersbw" placeholder="# insert your tier functions here, one per line
@@ -146,6 +145,7 @@ d u
       <div class="baseframe" id="reconstructions_bw_out"></div>
   </div>
   </div>
+  <div class="footer"></div>
 	  </div>
 	</li>
 	<li class="reiter">
@@ -165,11 +165,79 @@ d u
         <button class="mybutton" style="background-color:lighgray;color:darkblue;display:none;" id="fileloaded" ></button>
 
 	  </div>
+    <div class="footer"></div>
+    </div>
+	</li>
+	<li class="reiter">
+	  <input type="radio" name="tabreiter-0" id="tabreiter-0-5" />
+	  <label class="main" for="tabreiter-0-5">Help</label>
+	  <div>
+      <div class="tabbed">  
+        <h3>Help</h3>
+        <h4>Sound Classes and Sound Laws</h4>
+        We define sound classes for all sounds in our sample, to account for
+        the common groupings used by linguists to mark sounds that share
+        certain properties (similar to distinctive features, but more
+        flexible). See the code examples on how features are defined. Note that
+        individual sounds and all individual segments (e.g., also the equation
+        mark) need to be segmented by a space to be recognized by the program.
+        <br> We define sound laws in the typical fashion used in historical
+        linguistics, with the exception that we use a strict space separation
+        to define sounds. In addition, we allow to address suprasegmental
+        aspects of a sequence, which need to be defined by providing another
+        tier that marks the respective suprasgemental aspect for each segment
+        in your data by the construct <font style="font-family: monospace,monospace;">@TIER[VALUE]</font> which precedes a sound class
+      or a sound. With this construct, you can also mark the source sound which
+      is supposed to be modified directly, as shown in our example.  <br> Note
+      that the dot is reserved as a specific symbol that indicates that two
+      sounds were merged to mark an evolving unit. As a result, sound class
+      names should not contain any dots. They can contain an underscore, but
+      they cannot contain a whitespace.
+        <h4>Forward Reconstruction</h4>
+        <p>
+        Reconstruction here uses unordered or anachronical sound laws which are applied
+        to each segment of a sequence without taking into account that the
+        application of a sound law might result in the modification of the
+        sequence itself. Anachronical sound laws are a very powerful analytical
+        step that helps to identify chronological sound laws properly. While
+        you can provide direct suprasegmental information by adding
+        multi-tiered sequences, we provide some basic functions by which these
+        tiers can be computed. If you want to make use of these functions that
+        take a sequence as input and ield a tier as output that is passed to
+        the algorithm, your tier-name needs to be identical with the function
+        and preceded by an @ symbol, such as, e.g., @tone.
+        </p>
+        <h4>Backward Reconstruction</h4>
+        <p>
+        Our backwards reconstruction starts from a target word in the language
+        and then goes upwards to identify the sequences in the proto-language
+        that could have accounted for this string. This requires some
+        adjustments regarding your sound laws, since it is difficult to predict
+        elements which have disappared, so you should adjust the laws in such a
+        way that you avoid sound laws involving a loss of an element but
+        instead model these as the modification of two elements in the
+        ancestral language that become one element in the target language. Once
+        this is accounted for, you can safely apply our procedure, which first
+        identifies all possible source sounds, then takes the cartesian product
+        to create all possible words from these sound combinations, and finally
+        evaluates all of the word against the sound changes to see if these are
+        possible.
+
+        </p>
+
+      </div>
+      <div class="footer"></div>
     </div>
 	</li>
 
+
       </ul>
+
+
     </div>
+
+
 <script src="js/action.js"></script>
+<script src="js/integrate.js"></script>
 </body>
 </html>

@@ -32,7 +32,7 @@ tbody td {
 }
 
 .resource-button {
-  background-color: #2d6ca2;
+  background-color: #552200;
   color: white;
   cursor: pointer;
   font-weight: bold;
@@ -50,7 +50,7 @@ tbody td {
 }
 
 #archive {
-  background-color: #2d6ca2;
+  background-color: #552200;
   opacity: 0.75;
   cursor: pointer;
   color:white;
@@ -63,7 +63,7 @@ tbody td {
 }
 
 body {
-  background-color: #2d6ca2;
+  background-color: #552200;
 }
 h1, h2 {
   color: white;
@@ -104,7 +104,7 @@ div.menu-icon > div {
   width: 100%;
   max-width: 1400px;
   height: 100%;
-  background-color: #2d6ca2;
+  background-color: #552200;
   margin-left: auto;
   margin-right: auto;
   padding-left: 10px;
@@ -116,7 +116,7 @@ div.menu-icon > div {
 .footer {
   text-align: center;
   color: white;
-  background-color: #2d6ca2;
+  background-color: #552200;
   font-size: 80%;
   display: flex; /* or inline-flex */
   padding: 20px;
@@ -131,7 +131,7 @@ div.menu-icon > div {
 
 .tabreiter > ul > li > label.main {
   font-weight: bold;
-  color: #2d6ca2;
+  color: #552200;
 }
 .tabreiter > ul > li > label.smart {
   display: none;
@@ -466,7 +466,7 @@ div.menu-icon > div {
   }
   .dropdown-content > label:hover {
     opacity: 1;
-    background-color: #2d6ca2;
+    background-color: #552200;
   }
   #content td{
     float:justify;
