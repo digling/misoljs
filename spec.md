@@ -166,8 +166,7 @@ Context in left and right context is identically defined by a segmental represen
 s > ʃ / _ [p t k] vowel
 ```
 
-Here, the square brackets `[` and `]` are used to indicate that the three sounds `p`, `t`, and `k` represent a group that can alte
-rnatively occur in the second position following the source sound. A full-fledged toy example that would model that an `s` becomes voiced when followed by a vowel and turns into a `ʃ` when followed by a consonant and a vowel, one could define the following sound classes:
+Here, the square brackets `[` and `]` are used to indicate that the three sounds `p`, `t`, and `k` represent a group that can alternatively occur in the second position following the source sound. A full-fledged toy example that would model that an `s` becomes voiced when followed by a vowel and turns into a `ʃ` when followed by a consonant and a vowel, one could define the following sound classes:
 
 ```
 consonant = p t k b d g s z ʃ
