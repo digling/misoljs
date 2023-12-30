@@ -50,7 +50,7 @@ function loaddata() {
 
 function loadsampledata() {
 
-  document.getElementById("sound_laws").value = "C1 > C1\nC3 > C2 / @tone[²¹⁴]_\nC3 > C1 / @tone[⁵⁵ ⁵¹ ³⁵]_\nC2 > C2\nV > V\nTONE > TONE\nRHYME > V V V";
+  document.getElementById("sound_laws").value = "C1 > C1\nC3 > C2 / @tone[²¹⁴]_\nC3 > C1 / @tone[⁵⁵ ⁵¹ ³⁵]_\nC2 > C2\nV > V\nTONE > TONE\nRHYME > [V V V]";
   document.getElementById("sound_classes").value = "P = p pʰ b\nK = k kʰ g\nT = t tʰ d\nC1 = p t k\nC2 = pʰ tʰ kʰ\nC3 = b d g\nTONE = ⁵⁵ ³⁵ ²¹⁴ ⁵¹\nV = a e i o u\nYIN = ⁵⁵ ³⁵ ⁵¹\nYANG = ²¹⁴\nGAP = - - -\nRHYMEP = a.p e.p i.p o.p u.p\nRHYMET = a.t e.t i.t o.t u.t\nRHYMEK = a.k e.k i.k o.k u.k\nRHYME = RHYMEP RHYMET RHYMEK";
   loaddata();
   document.getElementById("tiers").value = "segments\n@tone";
@@ -268,6 +268,25 @@ function toggle_bwr(node){
     CLS.bwr_show = "perfect";
   }
 
+}
+
+
+function filter_data(node, where, what) {
+  var div = document.getElementById(where);
+  /* determine the node value */
+  var value = node.value.trim();
+  var row, cell, i;
+  var tab = div.childNodes[0].rows;
+  for (i = 1; i < tab.length; i += 1) {
+    row = tab[i];
+    cell = row.cells[what];
+    if (cell.innerText.replace(/\s+/g, " ").indexOf(value) == -1) {
+      row.style.visibility = "collapse";
+    }
+    else {
+      row.style.visibility = "visible";
+    }
+  }
 }
 
 function export_data(){
