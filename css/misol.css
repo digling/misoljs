@@ -13,6 +13,17 @@
   font-weight: bold;
 }
 
+.gap {
+  width: 5px;
+  background-color: white;
+  border: 1px solid gray;
+  display: inherit;
+  margin: 5px;
+  padding: 5px;
+  font-weight: normal;
+  color: lightgray;
+}
+
 .unifiedsound {
   background-color: lightblue;
   border: 1px dashed black;

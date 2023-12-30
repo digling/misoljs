@@ -107,6 +107,12 @@ function highlight_errors(){
     if (["?", "!"].indexOf(sounds[i].innerHTML[0]) != -1) {
       sounds[i].style.border = "2px solid red";
     }
+    else if (sounds[i].innerHTML[0] == "-") {
+      //sounds[i].style.width = "10px";
+      //sounds[i].style.color = "gray";
+      //sounds[i].style.backgroundColor = "white";
+      sounds[i].className = "gap";
+    }
   }
 }
 

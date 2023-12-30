@@ -132,7 +132,7 @@ function parse_law(lawstring){
 /* when parsing, we should allow for nested structures, such that @tier[a b c]@[a b c] is parsed as 
  * [ [ [ a b c ], [ a b c ] ] ], [ [ tier, segments ] ]
  * */
-function parse_rightleft_context(contextstring, classes){
+function parse_rightleft_context(contextstring, misol){
   if (contextstring === "") {
     return [];
   }
@@ -146,7 +146,7 @@ function parse_rightleft_context(contextstring, classes){
   var this_sound = '';
   var this_tier = '';
   /* add space to context string */
-  if (contextstring[contextstring.length-1] !== "]") {
+  if (contextstring[contextstring.length - 1] !== "]") {
     contextstring = contextstring + " ";
   }
   var bracket_closed = false;
@@ -167,8 +167,13 @@ function parse_rightleft_context(contextstring, classes){
       current_sounds = this_sound.split(" ");
       this_sound = [];
       for (j = 0; j < current_sounds.length; j += 1) {
-        for (k = 0; k < classes[current_sounds[j]].length; k += 1) {
-          this_sound.push(classes[current_sounds[j]][k]);
+        if (typeof misol.classes[current_sounds[j]] == "undefined") {
+          misol.classes[current_sounds[j]] = [current_sounds[j]];
+          misol.sounds[current_sounds[j]] = {};
+          misol.sounds[current_sounds[j]][current_sounds[j]] =  0;
+        }
+        for (k = 0; k < misol.classes[current_sounds[j]].length; k += 1) {
+          this_sound.push(misol.classes[current_sounds[j]][k]);
         }
       }
       sounds.push(this_sound);
@@ -177,7 +182,6 @@ function parse_rightleft_context(contextstring, classes){
       this_tier = "";
     }
     else if (chr === " ") {
-      console.log(this_sound, this_tier);
       if (bracket) {
         this_sound = this_sound+" ";
       }
@@ -186,7 +190,12 @@ function parse_rightleft_context(contextstring, classes){
           bracket_closed = false;
         }
         else {
-          sounds.push(classes[this_sound]);
+          if (typeof misol.classes[this_sound] == "undefined") {
+            misol.classes[this_sound] = [this_sound];
+            misol.sounds[this_sound] = {};
+            misol.sounds[this_sound][this_sound] = 0;
+          }
+          sounds.push(misol.classes[this_sound]);
           tiers.push(this_tier);
           this_sound = "";
           this_tier = "";
@@ -219,6 +228,7 @@ function parse_context(contextstring) {
   // noinspection RegExpRedundantEscape,RegExpSimplifiable
   matches = contextstring.match(/\s{0,1}@{1,1}([^\s]*)\[([^\]]*)\]_\s{0,1}|\s{0,1}()_\s{0,1}/);
   if (matches === null) {
+    alert("null matches");
     console.log("NULL", contextstring);
   }
   if (typeof matches[1] != "undefined") {
@@ -242,30 +252,38 @@ class SoundClasses {
     this.sounds = {};
     this.bwr_show = "perfect";
     var i, j, k, cls, sounds_, sounds, sound;
-    for (i=0; i<items.length; i++) {
+    var visited = [];
+    for (i = 0; i < items.length; i += 1) {
       [cls, sounds_] = items[i].split(" = ");
       sounds_ = sounds_.split(" ");
       sounds = [];
-      for (j=0; j < sounds_.length; j++) {
-        sound = sounds_[j];
-        if (sound in this.classes){
-          for (k=0; k<this.classes[sound].length; k++) {
-            sounds.push(this.classes[sound][k]);
+      if (visited.indexOf(cls) != -1) {
+        alert("Line " + (i + 1) + " defines class " + cls + ", but this class has been defined before and will be ignored!");
+      }
+      else {
+        visited.push(cls);
+        for (j = 0; j < sounds_.length; j += 1) {
+          sound = sounds_[j];
+          visited.push(sound);
+          if (sound in this.classes){
+            for (k = 0; k < this.classes[sound].length; k += 1) {
+              sounds.push(this.classes[sound][k]);
+            }
+          }
+          else {
+            sounds.push(sound);
           }
         }
-        else {
-          sounds.push(sound);
-        }
-      }
-      this.classes[cls] = [];
-      for (j=0; sound=sounds[j]; j++) {
-        this.classes[cls].push(sound);
-        if (sound in this.sounds) {
-          this.sounds[sound][cls] = j;
-        }
-        else {
-          this.sounds[sound] = {};
-          this.sounds[sound][cls] = j;
+        this.classes[cls] = [];
+        for (j = 0; sound=sounds[j]; j += 1) {
+          this.classes[cls].push(sound);
+          if (sound in this.sounds) {
+            this.sounds[sound][cls] = j;
+          }
+          else {
+            this.sounds[sound] = {};
+            this.sounds[sound][cls] = j;
+          }
         }
       }
     }
@@ -293,12 +311,21 @@ class SoundClasses {
         source = source.split(" ");
         target = target.split(" ");
         for (j = 0; elm = source[j]; j += 1) {
+          if (typeof this.classes[elm] == "undefined") {
+            this.classes[elm] = [elm];
+            this.sounds[sound] = {};
+            this.sounds[sound][sound] = 0;
+          }
           sources = sources.concat(this.classes[elm]);
         }
         for (j = 0; elm = target[j]; j += 1) {
+          if (typeof this.classes[elm] == "undefined") {
+            this.classes[elm] = [elm];
+            this.sounds[sound] = {};
+            this.sounds[sound][sound] = 0;
+          }
           targets = targets.concat(this.classes[elm]);
         }
-        //[sources, targets] = [this.classes[source], this.classes[target]];
         if (sources.length != targets.length) {
           alert("source and target have different lengths in law"+i);
         }
@@ -307,7 +334,7 @@ class SoundClasses {
           [left, right, self_tier] = parse_context(context);
           /* reverse the left context */
           if (left != "") {
-            before = parse_rightleft_context(left, this.classes);
+            before = parse_rightleft_context(left, this);
             before[0] = before[0].reverse();
             before[1] = before[1].reverse(); 
           }
@@ -315,7 +342,7 @@ class SoundClasses {
             before = [[], []];
           }
           if (right != "") {
-            after = parse_rightleft_context(right, this.classes);
+            after = parse_rightleft_context(right, this);
           }
           else {
             after = [[], []];
@@ -342,7 +369,7 @@ class SoundClasses {
     for (sound in this.laws) {
       for (i = 0; i < this.laws[sound].length; i += 1) {
         /* add the tier information */
-        for (j=0; j<this.laws[sound][i][2].length; j++) {
+        for (j = 0; j < this.laws[sound][i][2].length; j += 1) {
           tier = this.laws[sound][i][2][j];
           if (tier == "") {
             tier = "segments_left_" + (j + 1);
@@ -439,8 +466,6 @@ class SoundClasses {
               tier[tier_self[0]+"_self_0"].push(this.classes[tier_selfs[j]][k]);
             }
           }
-          //tier[tier_self[0]+"_self_0"] = this.classes[tier_self[1]];
-          //console.log("tierselfs", tier_selfs, tier[tier_self[0]+"_self_0"]);
         }
 
         for (j = 0; j < this.tiers.length; j += 1) {
@@ -708,10 +733,10 @@ function test(){
   console.log(right+"|");
   console.log(left+"|");
   
-  var out = parse_rightleft_context(right, cls.classes);
+  var out = parse_rightleft_context(right, cls);
   console.log(out);
   
-  var out = parse_rightleft_context(left, cls.classes);
+  var out = parse_rightleft_context(left, cls);
   console.log(out);
   
   console.log(cls.laws["p"][0]);
@@ -724,41 +749,41 @@ function test(){
   console.log(cls.achro_forward({"segments": ["t", "a"], "tone": ["2", "2"]}));
   console.log(cls.achro_forward({"segments": ["q", "a"], "tone": ["2", "2"]}));
 
-  out2 = parse_rightleft_context("@initial[p t k] P", cls.classes);
+  out2 = parse_rightleft_context("@initial[p t k] P", cls);
   console.log(out2);
-  out2 = parse_rightleft_context("@[p t k]@initial[k p d] P", cls.classes);
+  out2 = parse_rightleft_context("@[p t k]@initial[k p d] P", cls);
   console.log(out2);
 
 
 }
 
-test()
+//test()
 
-var test = [
-  "a > b / _ x", 
-  "a n > ə - / _ x",
-  "[a b] > [c d] / _ x"
-];
-
-
-console.log(parse_law_string("[a b cd] [a b]"));
-console.log(parse_law_string("a  b [ c  d ]"));
-console.log(parse_law_string("a [ c  d ] c"));
-console.log(parse_law_string("a"));
-console.log(parse_law_string("[a  b  ] [ a b]"));
-
-tests = [
-  "a > b / _ $",
-  "a b > c d",
-  "[a b] > [c d]",
-  "[a e] n > ə - / [a b c] _ x"
-];
-
-for (i = 0; i < tests.length; i += 1) {
-  test = tests[i];
-  console.log(test);
-  var laws = parse_laws(test);
-  for (j = 0; j < laws.length; j += 1) {
-    console.log(laws[j]);
-  }
-}
+// var test = [
+//   "a > b / _ x", 
+//   "a n > ə - / _ x",
+//   "[a b] > [c d] / _ x"
+// ];
+// 
+// 
+// console.log(parse_law_string("[a b cd] [a b]"));
+// console.log(parse_law_string("a  b [ c  d ]"));
+// console.log(parse_law_string("a [ c  d ] c"));
+// console.log(parse_law_string("a"));
+// console.log(parse_law_string("[a  b  ] [ a b]"));
+// 
+// tests = [
+//   "a > b / _ $",
+//   "a b > c d",
+//   "[a b] > [c d]",
+//   "[a e] n > ə - / [a b c] _ x"
+// ];
+// 
+// for (i = 0; i < tests.length; i += 1) {
+//   test = tests[i];
+//   console.log(test);
+//   var laws = parse_laws(test);
+//   for (j = 0; j < laws.length; j += 1) {
+//     console.log(laws[j]);
+//   }
+// }

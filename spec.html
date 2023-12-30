@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Johann-Mattis List" />
+  <title>spec</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="css/pandoc.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<h3 id="components-of-misol-overview">1 Components of MISOL
+(Overview)</h3>
+<p>MISOl consists of four major components accessible in four different
+tabs of the web interface. The first component defines sound classes and
+sound laws. The former allow to group sounds into arbitrary units, and
+the latter allow to define how sounds in an ancestral language change
+into sounds in a descendant language in a certain context. The second
+component allows to convert words in the ancestral language into words
+in the descendant language (also known as “forward reconstruction”), and
+the third component allows to guess from which words in the ancestral
+language a given word in the target language has evolved. The fourth
+component allows to import and export data in text form, enabling users
+to store their analyses, parse the data with additional software tools,
+or to compare different approaches to solve the same problem in
+phonological reconstruction. The components are summarized in Figure
+1.</p>
+<figure>
+<img src="img/workflow.png?raw=true" title="Major components of MISOL"
+style="width:90.0%" alt="Figure 1: Major components of MISOL" />
+<figcaption aria-hidden="true">Figure 1: Major components of
+MISOL</figcaption>
+</figure>
+<h3 id="defining-sound-classes-tab-classes-and-laws">2 Defining Sound
+Classes (Tab “Classes and Laws”)</h3>
+<p>The table of sound classes defines sounds in a very simple way, by
+assigning one or more sounds or sound classes to a certain sound class
+label on each line. Sound classes are read in from the first to the last
+line and definitions are stored at the time a line is parsed. As a
+result, sound class assignments can be combined, and an existing sound
+class can be assigned to another class.</p>
+<p>The assignment of one or more sounds or sound classes to a given
+sound class is represented in the form:</p>
+<div class="mycode">
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ex">name</span> = sound1 sound2 sound3</span></code></pre></div>
+</div>
+<p>The <code>name</code> of a sound class must be alphanumeric, similar
+to typical Python variables, and should not start with a number. The
+<code>=</code>-sign must have a space to the left and to the right. All
+sounds (or sound groups referenced by invoking an existing sound class
+name) must be separated by a space.</p>
+<p>Thus, the following examples for sound class definitions are all
+<em>wrong</em>:</p>
+<div class="badcode">
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="va">name</span><span class="op">=</span>sound1 <span class="ex">sound2</span> sound3</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="ex">name</span> =sound1 sound2 sound3</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="va">name</span><span class="op">=</span> <span class="ex">sound1</span> sound2 sound3</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="ex">1name</span> = sound1 sound2 sound3</span></code></pre></div>
+</div>
+<p>Internally, a sound class is an ordered list of sounds. By assigning
+sounds to a sound class, the sounds are made available to the MISOL
+system to act as source and target of sound change processes and to be
+referenced in sound laws. In addition to referencing groups of sounds
+with the help of sound class variables, all individual (“terminal”)
+sounds are also represented in as sound classes. The difference is that
+these classes have the same label as the sound iself and that they
+contain only one element (the sound they refer to).</p>
+<p>Furthermore, each final symbol that is identified as a sound (and not
+a sound class name) by the MISOL system is also assigned to its own
+class with one single manner. Thus, the following line will define as
+many as 5 internal sound classes, of which four have one single member,
+and the first targets the four only sounds in the system.</p>
+<pre><code>my_class = a b c d</code></pre>
+<p>Thus, internally, this will result in the following key-value
+representation:</p>
+<div class="mycode">
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;my_class&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;a&quot;</span><span class="ot">,</span> <span class="st">&quot;b&quot;</span><span class="ot">,</span> <span class="st">&quot;c&quot;</span><span class="ot">,</span> <span class="st">&quot;d&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;a&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;a&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;b&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;b&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;c&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;c&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;d&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;d&quot;</span><span class="ot">]</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+</div>
+<p>When parsing sound laws, MISOL automatically checks for sounds that
+have not been referenced in the sound class table and adds them as
+individual sounds to the table of sound classes. As a result, you do
+<strong>not need to define sound classes in order to define sound
+laws</strong>.</p>
+<p>In order to check which sound classes have been defined in MISOL,
+click on the SHOW CLASSES AND LAWS button, after having inserted your
+sound class definitions and your sound laws in the <em>Classes and
+Laws</em> tab. A table will open and present you all sound classes that
+have been defined, including both those classes that you defined
+actively, as well as those classes that were inferred automatically from
+the sound laws you defined.</p>
+<p>When you check the sound classes in MISOL, you will see that the list
+of classes shows three sound classes in the beginning, which are
+provided independently of what you have defined or not. These reserved
+classes, are the symbols <code>^</code>, <code>$</code>, and
+<code>-</code>. <code>^</code> refers to the beginning of a sequence and
+can be used in the context string of a sound law. The same holds for
+<code>$</code> referring to the end of a sequence. <code>-</code> refers
+to a specific sound law in which an element is lost (rather than being
+replaced by something). It can also be used as a source sound (in the
+case of epenthesis, which must be actively modeled) or as a target sound
+in a sound law. Other than for this specific purpose, the symbols should
+not be used.</p>
+<p>Sound classes are a way to model distinctive features that define
+individual sounds. The difference between feature-bundle representations
+for sounds in sound change models is that features are flexibly defined
+on the fly, and modeled rather as “tags” of individual sounds, or a
+shortcut to reference the sounds that are tagged with a certain sound
+class name in an ordered manner. In our opinion, this comes quite close
+to the way feature bundles are used intuitively by linguists so far,
+since one can define one’s sound system in a convenient manner, and
+provide major distinctions that may play a role in sound laws, such as
+voicing distinctions of consonants:</p>
+<div class="mycode">
+<pre><code>voiced = b d g
+voiceless = p t k</code></pre>
+</div>
+<p>Another important aspect of sound classes is that they can be used as
+a shortcut for a group of sounds in sound laws, which often consist of
+an abstract set of independent sound changes, rather than an individual
+sound change that occurs in one context alone. As a result, one can
+refer to both individual sounds and to sound classes in the sound law
+descriptions of MISOL.</p>
+<p>As a further note on the way in which sound classes are handled in
+MISOL, consider the following assignments:</p>
+<div class="mycode">
+<pre><code>voiced = b d g
+voiceless = p t k
+consonant = voiced voiceless m n ŋ</code></pre>
+</div>
+<p>This translates internally to the following major sound class
+representations:</p>
+<div class="mycode">
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;voiced&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;b&quot;</span><span class="ot">,</span> <span class="st">&quot;d&quot;</span><span class="ot">,</span> <span class="st">&quot;g&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;voiceless&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;p&quot;</span><span class="ot">,</span> <span class="st">&quot;t&quot;</span><span class="ot">,</span> <span class="st">&quot;k&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;consonant&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;b&quot;</span><span class="ot">,</span> <span class="st">&quot;d&quot;</span><span class="ot">,</span> <span class="st">&quot;g&quot;</span><span class="ot">,</span> <span class="st">&quot;p&quot;</span><span class="ot">,</span> <span class="st">&quot;t&quot;</span><span class="ot">,</span> <span class="st">&quot;k&quot;</span><span class="ot">,</span> <span class="st">&quot;m&quot;</span><span class="ot">,</span> <span class="st">&quot;n&quot;</span><span class="ot">,</span> <span class="st">&quot;ŋ&quot;</span><span class="ot">]</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+</div>
+<p>Thus, if a sound class like <code>voiced</code> has been assigned to
+a list of sounds, the label can be reused in order to assign the same
+group of sounds to another sound class. Internally, all sound classes
+are only represented as a group of terminal sounds, and only sound laws
+can be reused in assignments if they have already be defined. As a
+result, the following order of assignments would be problematic:</p>
+<div class="badcode">
+<pre><code>consonant = voiced voiceless m n ŋ
+voiced = b d g
+voiceless = p t k</code></pre>
+</div>
+<p>Since <code>voiced</code> and <code>voiceless</code> have not been
+introduced yet with their target group of sounds, the interpreting code
+of MISOL would treat them as individual sounds (which can be represented
+by any string combination, provided it does not contain a space).
+Invididual sounds, however cannot be assigned to another group of
+sounds, since they are internally assigned to a group of one sound only,
+so the program throws a warning here and ignores the corresponding
+line.</p>
+<p>Since MISOL does not care how you define your sounds, it offers the
+possibility to work with groups of sounds as well as with individual
+sounds when dealing with sound change. In order to make sure that we
+distinguish groups from individual sounds, the recommendation is to use
+a dot <code>.</code> between sounds in a sound sequence in order to
+indicate that one is not dealing with individual phonemes. Thus, the
+final or rhyme of a Chinese word like <code>[</code>kwaŋ<code>]</code>
+could then be conveniently written as <code>a.ŋ</code>. MISOL, however,
+will treat this sequence of grouped sounds as an individual sound class
+(potentially a terminal one) and not assign it a specific semantics.</p>
+<p>Since sound classes are ordered lists of sounds, nothing speaks
+against it if you assign the same sound multiple times to one and the
+same sound class. This may be important in cases where <em>mergers</em>
+are described in complex sound laws that deal with more than one input
+sound.</p>
+<p>There are two symbols which are automatically defined as sounds,
+which cannot be assigned to sound class groups: <code>^</code>
+represents the beginning of each word and <code>$</code> the end.
+<code>#</code> is reserved as a comment marker.</p>
+<h3 id="defining-sound-laws-tab-classes-and-laws">3 Defining Sound Laws
+(Tab “Classes and Laws”)</h3>
+<p>A sound law is an abstract formula that shows how one or more sounds
+in an ancestral language are converted to one or more sounds in a
+descendant language. It has the general formula:</p>
+<div class="mycode">
+<pre class="shell"><code>source &gt; target / context</code></pre>
+</div>
+<p>The number of source sounds and target sounds must be identical and
+the context is optional and can be omitted:</p>
+<div class="mycode">
+<pre class="shell"><code>source &gt; target</code></pre>
+</div>
+<p>The change marker <code>&gt;</code> must be preceded and followed by
+a space. So the following lines would be erroneous and lead to
+errors.</p>
+<div class="badcode">
+<pre class="shell"><code>source&gt; target
+source &gt;target
+source&gt;target</code></pre>
+</div>
+<h4 id="source-and-target-in-sound-laws">3.1 Source and Target in Sound
+Laws</h4>
+<p>Source and target can be either a single sound, sound class, or list
+of sounds (indicated by square brackets) or a sequence of sounds. If a
+sequence of sounds is provided, this will be interpreted internally by
+invoking two or more separate sound laws. Thus, writing</p>
+<div class="mycode">
+<pre><code>a b &gt; [c d / x _ y</code></pre>
+</div>
+<p>is equivalent to writing</p>
+<div class="mycode">
+<pre><code>a &gt; c / x _ b y
+b &gt; d / x a _ y</code></pre>
+</div>
+<p>Allowing to define consecutive sounds is thus a mere shortcut but it
+can come in handy in those cases where it seems difficult to define
+complex sound laws.</p>
+<p>If you pass a sound class, a single sound, or a list of sounds does
+not make a difference. Thus, if you have defined a sound class
+<code>ptk</code> as shortcut for the sounds <code>p</code>,
+<code>t</code>, and <code>k</code>, the following two statements are
+equivalent:</p>
+<div class="mycode">
+<pre><code>ptk &gt; ptk
+[p t k] &gt; [p t k]</code></pre>
+</div>
+<p>The same holds for sequences of sounds:</p>
+<div class="mycode">
+<pre><code>ptk ptk &gt; ptk ptk
+[p t k] [p t k] &gt; [p t k] [p t k]</code></pre>
+</div>
+<p>Mixing is also possible.</p>
+<div class="mycode">
+<pre><code>ptk [p t k] &gt; [p t k] ptk</code></pre>
+</div>
+<p>Note, however, that it is essential that the source and the target
+always contain the <em>same amount of sounds</em> and the <em>same
+amount of positions</em>. If you want to indicate the loss of a sound,
+use the <code>-</code> as gap marker:</p>
+<div class="mycode">
+<pre><code>ptk ptk &gt; ptk [- - -]</code></pre>
+</div>
+<p>Note in this example, that you cannot write a single gap symbol, but
+must assemble a group (or define a sound class with the group before),
+since we require to have one target sound for each source sound and vice
+versa. This means also, that you must repeat a sound when using sound
+class notations to formulate sound laws, where a merger happens.</p>
+<div class="mycode">
+<pre><code>[p t k] &gt; [p p p]</code></pre>
+</div>
+<p>MISOL will in all cases represent sound laws individually, on the
+basis of one source sound corresponding to one target sound in one
+individual context.</p>
+<h4 id="context-in-sound-laws">3.2 Context in Sound Laws</h4>
+<p>The context typically has the form:</p>
+<div class="mycode">
+<pre><code>left_context _ right_context</code></pre>
+</div>
+<p>Here, <code>_</code> represents the source sound. Both left and right
+context can be omitted.</p>
+<div class="mycode">
+<pre><code>left_context _
+_ right_context</code></pre>
+</div>
+<p>Context in left and right context is identically defined by a
+segmental representation of the sound sequence proceeds to the left in
+the left context and to the right in the right context. In this way,
+theoretically even very long ranging contexts can be modeled. If one
+wants to change an <code>[</code>s<code>]</code> followed by
+<code>[</code>p, t, k<code>]</code> and a vowel to
+<code>[</code>ʃ<code>]</code>, one can write:</p>
+<div class="mycode">
+<pre><code>s &gt; ʃ / _ [p t k] vowel</code></pre>
+</div>
+<p>Here, the square brackets <code>[</code> and <code>]</code> are used
+to indicate that the three sounds <code>p</code>, <code>t</code>, and
+<code>k</code> represent a group that can alternatively occur in the
+second position following the source sound. A full-fledged toy example
+that would model that an <code>s</code> becomes voiced when followed by
+a vowel and turns into a <code>ʃ</code> when followed by a consonant and
+a vowel, one could define the following sound classes:</p>
+<div class="mycode">
+<pre><code>consonant = p t k b d g s z ʃ
+ptk = p t k b d g
+vowel = a e i o u</code></pre>
+</div>
+<p>These could then be used in four sound laws:</p>
+<div class="mycode">
+<pre><code>s &gt; ʃ / _ [p t k] vowel
+s &gt; z / _ vowel
+p t k b d g &gt; p t k b d g
+vowel &gt; vowel</code></pre>
+</div>
+<p>These would turn a word like <code>s t a b</code> into
+<code>ʃ t a b</code> but would turn <code>s a b</code> into
+<code>z a b</code>.</p>
+</body>
+</html>
