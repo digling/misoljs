@@ -24,9 +24,11 @@ my_class = a b c d
 
 Thus, internally, this will result in the following key-value representation:
 
+<div class="mycode">
+  
 ```json
 {
-  "my_class" = ["a", "b", "c", "d"],
+  "my_class": ["a", "b", "c", "d"],
   "a": ["a"],
   "b": ["b"],
   "c": ["c"],
@@ -34,25 +36,37 @@ Thus, internally, this will result in the following key-value representation:
 }
 ```
 
+</div>
+
 Sound classes are a way to model distinctive features that define individual sounds. The difference between feature-bundle representations for sounds in sound change models is that features are flexibly defined on the fly, and modeled rather as "tags" of individual sounds, or a shortcut to reference the sounds that are tagged with a certain sound class name in an ordered manner. In our opinion, this comes quite close to the way feature bundles are used intuitively by linguists so far, since one can define one's sound system in a convenient manner, and provide major distinctions that may play a role in sound laws, such as voicing distinctions of consonants:
 
+<div class="mycode">
+  
 ```
 voiced = b d g
 voiceless = p t k
 ```
 
+</div>
+
 Another important aspect of sound classes is that they can be used as a shortcut for a group of sounds in sound laws, which often consist of an abstract set of independent sound changes, rather than an individual sound change that occurs in one context alone. As a result, one can refer to both individual sounds and to sound classes in the sound law descriptions of MISOL.
 
 As a further note on the way in which sound classes are handled in MISOL, consider the following assignments:
 
+<div class="mycode">
+  
 ```
 voiced = b d g
 voiceless = p t k
 consonant = voiced voiceless m n ŋ
 ``` 
 
+</div>
+
 This translates internally to the following major sound class representations:
 
+<div class="mycode">
+  
 ```json
 {
   "voiced": ["b", "d", "g"],
@@ -61,13 +75,19 @@ This translates internally to the following major sound class representations:
 }
 ```
 
+</div>
+
 Thus, if a sound class like `voiced` has been assigned to a list of sounds, the label can be reused in order to assign the same group of sounds to another sound class. Internally, all sound classes are only represented as a group of terminal sounds, and only sound laws can be reused in assignments if they have already be defined. As a result, the following order of assignments would be problematic:
 
+<div class="mycode">
+  
 ```
 consonant = voiced voiceless m n ŋ
 voiced = b d g
 voiceless = p t k
 ```
+
+</div>
 
 Since `voiced` and `voiceless` have not been introduced yet with their target group of sounds, the interpreting code of MISOL would treat them as individual sounds (which can be represented by any string combination, provided it does not contain a space). Invididual sounds, however cannot be assigned to another group of sounds, since they are internally assigned to a group of one sound only, so the program +++should+++ throw an error here, given that the re-assignment of one sound class to another set of sounds is not allowed.
 
