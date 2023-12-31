@@ -245,8 +245,9 @@ function parse_context(contextstring) {
 
 
 class SoundClasses {
-  constructor (items, laws){
+  constructor (items, laws, mode){
     /* parse the sound classes */
+    this.mode = mode;
     this.raw = {};
     this.classes = {"^": ["^"], "$": ["$"], "-": ["-"], "?": ["?"]};
     this.sounds = {};
@@ -499,7 +500,13 @@ class SoundClasses {
     }
     /* process tiers to identify the basic encoding routine */
   }
-  achro_forward(sequence) {
+  achro_forward(sequence, mark_missing) {
+    var missing_marker = (
+      (mark_missing)
+      ? ["?", "!"]
+      : ["", ""]
+    );
+    console.log(missing_marker)
     /* read in the information about the sequence */
     /* sequence must be encoded as a dictionary {"segments": "t o x t a", "stress": "1 1 1 0 0"} */
     var length = sequence["segments"].length;
@@ -517,9 +524,7 @@ class SoundClasses {
       source = sequence["segments"][i];
       this_vector = [];
       for (j = 0; tier = this.tiers[j]; j ++) {
-        console.log(sequence);
         [label, pos, idx] = tier.split("_");
-        // console.log(label, pos, idx);
         idx = parseInt(idx);
         if (pos == "right") {
           if (i + idx == length) {
@@ -540,7 +545,6 @@ class SoundClasses {
             segment = "Ø";
           }
           else {
-            console.log(sequence, label);
             segment = sequence[label][(i - idx)];
           }
         }
@@ -549,7 +553,6 @@ class SoundClasses {
         }
         this_vector.push(segment);
       }
-      console.log(this_vector);
       /* now search through all tiers with this sound as source */
       recs = [];
       try {
@@ -557,7 +560,6 @@ class SoundClasses {
           matched = true;
           for (k = 0; k < this.tiers.length; k += 1) {
             val = this.all_laws[source][j][this.tiers[k]];
-            console.log("source", this.tiers[k], source, val, this.all_laws[source], this_vector[k]);
             if (val.indexOf(this_vector[k]) == -1 && val.indexOf("Ø") == -1) {
               matched = false;
               break;
@@ -568,11 +570,11 @@ class SoundClasses {
           }
         }
         if (recs.length == 0) {
-          recs = [["?"+source, 0]];
+          recs = [[missing_marker[0] + source, 0]];
         }
       }
       catch {
-        recs = [['!' + source, 0]]
+        recs = [[missing_marker[1] + source, 0]]
       }
       output.push(recs);
     }

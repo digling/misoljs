@@ -108,9 +108,6 @@ function highlight_errors(){
       sounds[i].style.border = "2px solid red";
     }
     else if (sounds[i].innerHTML[0] == "-") {
-      //sounds[i].style.width = "10px";
-      //sounds[i].style.color = "gray";
-      //sounds[i].style.backgroundColor = "white";
       sounds[i].className = "gap";
     }
   }
@@ -120,7 +117,23 @@ function highlight_errors(){
 function reconstruct() {
   document.getElementById("lawidxtoggler").style.display = "table-cell";
   document.getElementById("reconstructions").style.display = "flex";
-  var tiers_in_text = document.getElementById("tiers").value.split("\n");
+  /* determine reconstruction mode */
+  var strict_mode = (
+    (document.getElementById("reconstruction-mode").options[0].selected)
+    ? true
+    : false
+  );
+  var mark_missing = (
+    (document.getElementById("reconstruction-handling").options[0].selected)
+    ? true
+    : false
+  );
+
+  var tier_text = document.getElementById('tiers').value;
+  if (tier_text.trim() == "") {
+    tier_text = "segments";
+  }
+  var tiers_in_text = tier_text.split("\n");
   var sequences_in_text = document.getElementById("sequences").value.split("\n\n");
   var tiers = [];
   var funcs = [];
@@ -172,20 +185,20 @@ function reconstruct() {
   var rec_dict;
   var tgt, idx;
   sequences.forEach(function(sequence) {
-    recs = CLS.achro_forward(sequence);
+    recs = CLS.achro_forward(sequence, mark_missing);
     td = "<tr><td>";
-    for (i=0; i<sequence["segments"].length; i++) {
+    for (i = 0; i < sequence["segments"].length; i += 1) {
       td += '<span class="sound">'+sequence["segments"][i];
-      for (j=1; j<tiers.length; j++) {
+      for (j = 1; j < tiers.length; j += 1) {
         td += '<sup class="tier" title="Tier '+tiers[j]+'">'+sequence[tiers[j]][i]+"</sup>";
       }
       td += "</span>";
       //td += '<span style="width:20px;background-color:lightgray;display:table-cell;">.</span>';
     }
     td += "</td><td>";
-    for (i=0; i<recs.length; i++) {
+    for (i = 0; i < recs.length; i += 1) {
       rec_dict = {};
-      for (j=0; j<recs[i].length; j++) {
+      for (j = 0; j < recs[i].length; j += 1) {
         if (recs[i][j][0] in rec_dict) {
           rec_dict[recs[i][j][0]].push(recs[i][j][1]);
         }
@@ -194,27 +207,35 @@ function reconstruct() {
         }
       }
       rec_segs = [];
-      for (tgt in rec_dict) {
-        rec_segs.push('<span class="sound">'+tgt+'<sup style="display:none" title="Sound Law Indices" class="lawidx">'+rec_dict[tgt].join(",")+"</sup></span>");
-      }
-      if (rec_segs.length > 1) {
-        td += '<span class="unifiedsound">'+rec_segs.join('<span class="pipe"></span>')+'</span>';
+      /* different output depending on mode strict or ordered */
+      if (strict_mode) {
+        for (tgt in rec_dict) {
+          rec_segs.push('<span class="sound">'+tgt+'<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">'+rec_dict[tgt].join(",")+"</sup></span>");
+        }
+        if (rec_segs.length > 1) {
+          td += '<span class="unifiedsound">'+rec_segs.join('<span class="pipe"></span>')+'</span>';
+        }
+        else {
+          td += rec_segs[0];
+        }
       }
       else {
+        for (tgt in rec_dict) {
+          rec_segs.push('<span class="sound">' + tgt + '<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">' + rec_dict[tgt][0] + "</sup></span>");
+        }
         td += rec_segs[0];
       }
     }
     td += "</td>";
+    /* compare against attested sequences */
     if (Object.keys(desequences).length != 0) {
       t = desequences[sequence["segments"].join(" ")];
       if (typeof t == "undefined") {
         t = ["?"];
       }
       else {
-        t = t.split(" ");
-        for (i=0; i<recs.length; i++) {
-
-          console.log("recs", recs, t);
+        t = t.trim().split(" ");
+        for ( i = 0; i < recs.length; i += 1) {
           if (recs[i][0][0] != t[i]) {
             t[i] = "?"+t[i];
           }
@@ -395,3 +416,32 @@ function read_file(event){
   };
   reader.readAsText(input.files[0]);
 }
+
+
+function show_laws(node){
+  var laws = node.innerText.split(",");
+  var i;
+  var law_string = "";
+  var law;
+  for (i = 0; i < laws.length; i += 1) {
+    law = (
+      (parseInt(laws[i]) == 0) 
+      ? "[no sound law defined]" 
+      : CLS.raw_laws[parseInt(laws[i])]
+    );
+    law_string += "<tr><td>" + laws[i] + "</td><td>" 
+      + law 
+      + "</td></tr>";
+  }
+  var falert = document.createElement("div");
+  falert.id = "fake";
+  falert.className = 'fake_alert';
+  law_string = '<div class="message"><p>Sound Laws Matching the Segment</p><p><table class="soundlawtable"><tr><th>ID</th><th>Sound Law</th></tr>' + law_string + '</table></p>' 
+    + '<button class="mybutton" onclick="document.getElementById('+ "'" + 'fake' + "'" + ').remove();">OK</button></div>';
+  document.body.appendChild(falert);
+  falert.innerHTML = law_string;
+  document.onkeydown = function(event){document.getElementById("fake").remove();};
+}
+
+
+

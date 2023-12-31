@@ -231,8 +231,8 @@ separate sound laws. Thus, writing
 
 <div class="mycode">
 
-```
-a b > [c d / x _ y
+```shell
+a b > [c d] / x _ y
 ```
 
 </div>
@@ -241,7 +241,7 @@ is equivalent to writing
 
 <div class="mycode">
 
-```
+```shell
 a > c / x _ b y
 b > d / x a _ y
 ```
@@ -259,7 +259,7 @@ sounds `p`, `t`, and `k`, the following two statements are equivalent:
 
 <div class="mycode">
 
-```
+```shell
 ptk > ptk
 [p t k] > [p t k]
 ```
@@ -270,7 +270,7 @@ The same holds for sequences of sounds:
 
 <div class="mycode">
 
-```
+```shell
 ptk ptk > ptk ptk
 [p t k] [p t k] > [p t k] [p t k]
 ```
@@ -281,7 +281,7 @@ Mixing is also possible.
 
 <div class="mycode">
 
-```
+```shell
 ptk [p t k] > [p t k] ptk
 ```
 
@@ -291,7 +291,7 @@ Note, however, that it is essential that the source and the target always contai
 
 <div class="mycode">
 
-```
+```shell
 ptk ptk > ptk [- - -]
 ```
 
@@ -305,7 +305,7 @@ formulate sound laws, where a merger happens.
 
 <div class="mycode">
 
-```
+```shell
 [p t k] > [p p p]
 ```
 
@@ -320,7 +320,7 @@ The context typically has the form:
 
 <div class="mycode">
 
-```
+```shell
 left_context _ right_context
 ```
 
@@ -330,7 +330,7 @@ Here, `_` represents the source sound. Both left and right context can be omitte
 
 <div class="mycode">
 
-```
+```shell
 left_context _
 _ right_context
 ```
@@ -345,7 +345,7 @@ followed by `[`p, t, k`]` and a vowel to `[`ʃ`]`, one can write:
 
 <div class="mycode">
 
-```
+```shell
 s > ʃ / _ [p t k] vowel
 ```
 
@@ -360,7 +360,7 @@ sound classes:
 
 <div class="mycode">
 
-```
+```shell
 consonant = p t k b d g s z ʃ
 ptk = p t k b d g
 vowel = a e i o u
@@ -372,7 +372,7 @@ These could then be used in four sound laws:
 
 <div class="mycode">
 
-```
+```shell
 s > ʃ / _ [p t k] vowel
 s > z / _ vowel
 p t k b d g > p t k b d g

@@ -96,21 +96,55 @@ C3 > C3
 	  <div>
       <div class="tabbed">
         <h3>Forward Reconstruction</h3>
+        
+        <table class="optiontable"><tr>
+            <th>Reconstruction Mode:</th>
+            <td><select class="selector" name="mode" id="reconstruction-mode">
+          <option value="strict" selected=true>strict</option>
+          <option value="ordered" selected=false>ordered</option>
+              </select></td>
+          </tr>
+        <tr>
+          <th>Missing Sound Laws:</th>
+          <td>
+            <select class="selector" name="handling" id="reconstruction-handling">
+              <option value="mark" selected=true>mark</option>
+              <option value="ignore">ignore</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <th>Ordere of Sound Laws:</th>
+          <td>
+            <select class="selector" name="handling" id="reconstruction-order">
+              <option value="unordered" selected=true>unordered</option>
+              <option value="chronological">chronological</option>
+            </select>
+          </td>
+        </tr>
+
+        </table>
+        
   <div style="display: flex">
-    <textarea class="inputtext" cols="40" rows="5" id="tiers" placeholder="# insert your tiers here, one per line
-segments
-tone
-"></textarea>
-    <textarea class="inputtext" cols="40" rows="5" id="sequences" placeholder="# insert your sequence, separated by a blank line
+
+    <textarea class="inputtext" cols="60" rows="5" id="sequences" placeholder="# insert your sequence, separated by a blank line
 p a
 ⁵⁵ ⁵⁵
 
 d u
 ²¹⁴ ²¹⁴
 "></textarea>
+    <textarea class="inputtext" cols="30" rows="5" id="tiers" placeholder="# insert your tiers here
+# one per line
+# defaults to 'segments'
+segments
+tone
+"></textarea>
+
   </div>
   <button class="mybutton" onclick="reconstruct()">APPLY SOUND LAWS</button>
   <button style="display:none" id="lawidxtoggler" class="mybutton" onclick="togglelawidxs();">SHOW LAW IDS</button>
+  <input type="radio">
   <div id="reconstructions" style="display: none">
     <div>
     <input type="text" placeholder="filter source" onkeyup="filter_data(this, 'reconstructions_out', 0)" style="width:300px" />
@@ -200,8 +234,7 @@ d u
       is supposed to be modified directly, as shown in our example.  <br> Note
       that the dot is reserved as a specific symbol that indicates that two
       sounds were merged to mark an evolving unit. As a result, sound class
-      names should not contain any dots. They can contain an underscore, but
-      they cannot contain a whitespace.
+      names should not contain any dots. They can contain an underscore, but they cannot contain a whitespace.
         <h4>Forward Reconstruction</h4>
         <p>
         Reconstruction here uses unordered or anachronical sound laws which are applied
