@@ -4,6 +4,7 @@ LAWS["layer_lables"] = [];
 LAWS["base"] = {};
 
 var SETTINGS = {};
+SETTINGS["bwr_show"] = "perfect";
 
 function loaddata() {
   document.getElementById("settingstoggler").style.display = "table-cell";
@@ -33,7 +34,7 @@ function loaddata() {
     }
     if (element.indexOf(">") != -1 && element[0] != "#") {
       if (sound_law_layers.length == 0) {
-        sound_law_layers.push(["Layer_A"]);
+        sound_law_layers.push(["Target"]);
         sound_laws.push([]);
         sound_law_idx = 0;
       }
@@ -123,14 +124,17 @@ function backwards() {
   var recs;
   var count = 1;
   sequences.forEach(function(elm) {
-    recs = LAWS["base"].achro_backward(elm, funcs, mark_missing, strict_mode);
+    recs = LAWS["base"].achro_backward(
+      elm, funcs, mark_missing, strict_mode, 
+      SETTINGS.bwr_show == "imperfect" ? false : true
+    );
     if (recs.length == 0) {
-      txt += '<tr><td>'+count+'"</td><td>';
+      txt += '<tr><td>'+count+'</td><td>';
       txt += '<span class="sound">'+elm.join('</span><span class="sound">')+"</span>";
       txt += '</td><td><span style="color:red">?</span></td></tr>';
     }
     txt += "<tr>";
-    for (i=0; i<recs.length; i++) {
+    for (i = 0; i < recs.length; i += 1) {
       txt += "<td>"+count+"</td><td>";
       txt += '<span class="sound">'+elm.join('</span><span class="sound">')+"</span>";
       txt += "</td><td>";
@@ -220,7 +224,8 @@ function reconstruct() {
     }
     sequences.push(sequence);
   });
-  var text = '<table class="basictable"><tr><th>Source</th><th>Target</th>';
+  var text = '<table class="basictable"><tr><th>Source</th><th>'
+    + LAWS["layer_labels"].join("</th><th>") + "</th>";
   if (Object.keys(desequences).length != 0) {
     text += "<th>Expected</th>";
   }

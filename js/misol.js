@@ -608,7 +608,7 @@ class SoundClasses {
     }
     return output;
   }
-  achro_backward (sequence, funcs, mark_missing, strict_mode) {
+  achro_backward (sequence, funcs, mark_missing, strict_mode, perfect) {
     var i, j;
     var recs = [];
     for (i = 0; i < sequence.length; i ++) {
@@ -625,12 +625,11 @@ class SoundClasses {
     var proposal, matched;
     for (i = 0; i < possibles.length; i ++) {
       this_sequence = {"segments": possibles[i]};
-      for (j = 0; j < funcs.length; j ++) {
+      for (j = 0; j < funcs.length; j += 1) {
         this_sequence[funcs[j]] = TIERS[funcs[j]](possibles[i]);
       }
       /* reconstruct */
       proposal = this.achro_forward(this_sequence, mark_missing);
-      console.log("prop", proposal);
       matched = [];
       for (j = 0; j < proposal.length; j ++) {
         if (proposal[j].length == 1 && proposal[j][0][0] == sequence[j]) {
@@ -648,7 +647,7 @@ class SoundClasses {
         selected.push(possibles[i]);
       }
     }
-    if (this.bwr_show == "imperfect"){
+    if (!perfect){
       return possibles;
     }
     return selected;
