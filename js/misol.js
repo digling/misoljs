@@ -47,11 +47,23 @@ function parse_law_string(law_string) {
   out.forEach(element => sounds.push(element.trim().split(/\s+/g)));
   return sounds;
 }
+
+
 /* parse a sound law */
 function parse_laws(lawstring){
   var law, context, i, j;
   if (lawstring.indexOf("#") !== -1) {
     lawstring = lawstring.slice(0, lawstring.indexOf("#"));
+  }
+
+  /* sanity checks here */
+  if (lawstring.indexOf("/") != -1 && lawstring.indexOf(" / ") == -1) {
+    alert("string " + lawstring + " contains a slash but no spaces around it, ignoring the string");
+    return [];
+  }
+  if (lawstring.indexOf(">") != -1 && lawstring.indexOf(" > ") == -1) {
+    alert("string " + lawstring + " contains the character > without spaces around it, ignoring the string");
+    return [];
   }
   /* parse the context to get started */
   if (lawstring.indexOf(" / ") !== -1) {
@@ -168,9 +180,11 @@ function parse_rightleft_context(contextstring, misol){
       this_sound = [];
       for (j = 0; j < current_sounds.length; j += 1) {
         if (typeof misol.classes[current_sounds[j]] == "undefined") {
-          misol.classes[current_sounds[j]] = [current_sounds[j]];
-          misol.sounds[current_sounds[j]] = {};
-          misol.sounds[current_sounds[j]][current_sounds[j]] =  0;
+          if (current_sounds[j].trim() != "") {
+            misol.classes[current_sounds[j]] = [current_sounds[j]];
+            misol.sounds[current_sounds[j]] = {};
+            misol.sounds[current_sounds[j]][current_sounds[j]] =  0;
+          }
         }
         for (k = 0; k < misol.classes[current_sounds[j]].length; k += 1) {
           this_sound.push(misol.classes[current_sounds[j]][k]);
@@ -191,9 +205,11 @@ function parse_rightleft_context(contextstring, misol){
         }
         else {
           if (typeof misol.classes[this_sound] == "undefined") {
-            misol.classes[this_sound] = [this_sound];
-            misol.sounds[this_sound] = {};
-            misol.sounds[this_sound][this_sound] = 0;
+            if (this_sound.trim() != "") {
+              misol.classes[this_sound] = [this_sound];
+              misol.sounds[this_sound] = {};
+              misol.sounds[this_sound][this_sound] = 0;
+            }
           }
           sounds.push(misol.classes[this_sound]);
           tiers.push(this_tier);
@@ -313,17 +329,21 @@ class SoundClasses {
         target = target.split(" ");
         for (j = 0; elm = source[j]; j += 1) {
           if (typeof this.classes[elm] == "undefined") {
-            this.classes[elm] = [elm];
-            this.sounds[sound] = {};
-            this.sounds[sound][sound] = 0;
+            if (elm.trim() != "") {
+              this.classes[elm] = [elm];
+              this.sounds[sound] = {};
+              this.sounds[sound][sound] = 0;
+            }
           }
           sources = sources.concat(this.classes[elm]);
         }
         for (j = 0; elm = target[j]; j += 1) {
           if (typeof this.classes[elm] == "undefined") {
-            this.classes[elm] = [elm];
-            this.sounds[sound] = {};
-            this.sounds[sound][sound] = 0;
+            if (elm.trim() != "") {
+              this.classes[elm] = [elm];
+              this.sounds[sound] = {};
+              this.sounds[sound][sound] = 0;
+            }
           }
           targets = targets.concat(this.classes[elm]);
         }
@@ -459,10 +479,18 @@ class SoundClasses {
             tier[tier_right[j] + "_right_" + (j + 1)] = right_val;
           }
         }
+        /* add tier to class definition */
         if (tier_self[0] != "") {
           tier[tier_self[0] + "_self_0"] = [];
           tier_selfs = tier_self[1].split(" ");
           for (j = 0; j < tier_selfs.length; j += 1) {
+            if (typeof this.classes[tier_selfs[j]] == "undefined") {
+              if (tier_selfs[j].trim() != "") {
+                this.classes[tier_selfs[j]] = [tier_selfs[j]];
+                this.sounds[tier_selfs[j]] = {};
+                this.sounds[tier_selfs[j]][tier_selfs[j]] = 0;
+              }
+            }
             for (k = 0; k < this.classes[tier_selfs[j]].length; k += 1) {
               tier[tier_self[0]+"_self_0"].push(this.classes[tier_selfs[j]][k]);
             }
@@ -500,13 +528,13 @@ class SoundClasses {
     }
     /* process tiers to identify the basic encoding routine */
   }
+
   achro_forward(sequence, mark_missing) {
     var missing_marker = (
       (mark_missing)
       ? ["?", "!"]
       : ["", ""]
     );
-    console.log(missing_marker)
     /* read in the information about the sequence */
     /* sequence must be encoded as a dictionary {"segments": "t o x t a", "stress": "1 1 1 0 0"} */
     var length = sequence["segments"].length;
@@ -580,7 +608,7 @@ class SoundClasses {
     }
     return output;
   }
-  achro_backward (sequence, funcs) {
+  achro_backward (sequence, funcs, mark_missing, strict_mode) {
     var i, j;
     var recs = [];
     for (i = 0; i < sequence.length; i ++) {
@@ -588,10 +616,9 @@ class SoundClasses {
         recs.push(this.target2source[sequence[i]]);
       }
       else {
-        recs.push(["?"]);
+        recs.push([mark_missing ? "?" : sequence[i]]);
       }
     }
-    console.log(recs);
     var possibles = cartesianProduct(...recs);
     var selected = [];
     var this_sequence;
@@ -602,11 +629,15 @@ class SoundClasses {
         this_sequence[funcs[j]] = TIERS[funcs[j]](possibles[i]);
       }
       /* reconstruct */
-      proposal = this.achro_forward(this_sequence);
+      proposal = this.achro_forward(this_sequence, mark_missing);
+      console.log("prop", proposal);
       matched = [];
       for (j = 0; j < proposal.length; j ++) {
         if (proposal[j].length == 1 && proposal[j][0][0] == sequence[j]) {
           matched.push(1)
+        }
+        else if (!strict_mode && proposal[j].length > 1 && proposal[j][0][0] == sequence[j]){
+          matched.push(1);
         }
         else {
           matched.push(0);
@@ -623,6 +654,8 @@ class SoundClasses {
     return selected;
   }
 }
+
+
 
 var TIERS = {};
 TIERS.tone = function(sequence){

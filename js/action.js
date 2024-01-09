@@ -1,4 +1,9 @@
-var CLS = {};
+var LAWS = {};
+LAWS["layers"] = {};
+LAWS["layer_lables"] = [];
+LAWS["base"] = {};
+
+var SETTINGS = {};
 
 function loaddata() {
   document.getElementById("settingstoggler").style.display = "table-cell";
@@ -6,7 +11,9 @@ function loaddata() {
 
   var sound_classes_in_text = document.getElementById("sound_classes").value.split("\n");
   var sound_laws_in_text = document.getElementById("sound_laws").value.split("\n");
-  var sound_laws = ["? > ?"];
+  var sound_laws = [];
+  var sound_law_idx;
+  var sound_law_layers = [];
   var sound_classes = [];
   sound_classes_in_text.forEach(function (element) {
     if (element.indexOf("=") != -1 && element[0] != "#") {
@@ -14,21 +21,43 @@ function loaddata() {
     }
   });
   sound_laws_in_text.forEach(function (element) {
+    if (element.trim()[0] == "=" && element.trim()[element.trim().length -1] == "=") {
+      sound_laws.push([]);
+      sound_law_layers.push(element.trim().slice(2, element.trim().length - 2).trim());
+      if (typeof sound_law_idx == "undefined") {
+        sound_law_idx = 0;
+      }
+      else {
+        sound_law_idx += 1;
+      }
+    }
     if (element.indexOf(">") != -1 && element[0] != "#") {
-      sound_laws.push(element);
+      if (sound_law_layers.length == 0) {
+        sound_law_layers.push(["Layer_A"]);
+        sound_laws.push([]);
+        sound_law_idx = 0;
+      }
+      sound_laws[sound_law_idx].push(element);
     }
   });
-
-
-  var cls = new SoundClasses(sound_classes, sound_laws);
-  cls.assemble_laws();
   
+  var cls;
+  for (i = 0; i < sound_law_layers.length; i += 1) {
+    cls = new SoundClasses(sound_classes, sound_laws[i]);
+    cls.assemble_laws();
+    LAWS["layers"][sound_law_layers[i]] = cls;
+  }
+  console.log(LAWS, sound_law_layers);
+  LAWS["layer_labels"] = sound_law_layers;
+  LAWS["raw_laws"] = sound_laws;
+  LAWS["base"] = LAWS["layers"][LAWS["layer_labels"][0]];
+    
   var scls = document.getElementById("sound_classes_out");
   var txt = '<table class="basictable"><th>Class</th><th>Sounds</th></tr>';
-  for (this_cls in cls.classes) {
+  for (this_cls in LAWS["base"].classes) {
     txt += '<tr><td>'+this_cls+"</td><td>";
-    for (i=0; i<cls.classes[this_cls].length; i++) {
-      sound = cls.classes[this_cls][i];
+    for (i = 0; i < LAWS["base"].classes[this_cls].length; i += 1) {
+      sound = LAWS["base"].classes[this_cls][i];
       txt += '<span class="sound">'+sound+'</span>'; 
     }
     txt += "</td></tr>";
@@ -36,16 +65,21 @@ function loaddata() {
   txt += "</table>";
   scls.innerHTML = txt;
   var slaws = document.getElementById("sound_laws_out");
-  txt = '<table class="basictable"><tr><th>ID</th><th>Law</th><th>Source</th><th>Target</th></tr>';
-  for (i=0; i<Object.keys(cls.raw_laws).length; i++) {
-    for (j=0; j<cls.laws2tiers[i+1].length; j++) {
-      txt += "<tr><td>"+(i+1)+"</td><td>"+cls.raw_laws[(i+1)]+"</td><td>"+cls.laws2tiers[i+1][j]["source"]+"</td><td>"+cls.laws2tiers[i+1][j]["target"]+"</td></tr>";
+  txt = '<table class="basictable"><tr><th>ID</th><th>Law</th><th>Source</th><th>Target</th><th>Layer</th></tr>';
+  for (sound_law_idx = 0; sound_law_idx < sound_law_layers.length; sound_law_idx += 1){
+    cls = LAWS["layers"][sound_law_layers[sound_law_idx]];
+    for (i = 0; i < Object.keys(cls.raw_laws).length; i += 1) {
+      for (j = 0; j < cls.laws2tiers[i + 1].length; j += 1) {
+        txt += "<tr><td>" + (i + 1) + "</td><td>" + cls.raw_laws[(i + 1)] + "</td><td>" 
+          + cls.laws2tiers[i+1][j]["source"] + "</td><td>" 
+          + cls.laws2tiers[i+1][j]["target"] + "</td><td>" 
+          + sound_law_layers[sound_law_idx] + "</tr>";
+      }
     }
   }
   txt += "</table>";
   slaws.innerHTML = txt;
-  console.log(cls);
-  CLS = cls;
+  console.log(LAWS);
 }
 
 function loadsampledata() {
@@ -59,6 +93,16 @@ function loadsampledata() {
 
 function backwards() {
   document.getElementById("reconstructions-bw").style.display = "flex";
+  var strict_mode = (
+    (document.getElementById("reconstruction-mode-bw").options[0].selected)
+    ? true
+    : false
+  );
+  var mark_missing = (
+    (document.getElementById("reconstruction-handling-bw").options[0].selected)
+    ? true
+    : false
+  );
   var tiers_in_text = document.getElementById("tiersbw").value.split("\n");
   var funcs = [];
   tiers_in_text.forEach(function(element) {
@@ -79,7 +123,7 @@ function backwards() {
   var recs;
   var count = 1;
   sequences.forEach(function(elm) {
-    recs = CLS.achro_backward(elm, funcs);
+    recs = LAWS["base"].achro_backward(elm, funcs, mark_missing, strict_mode);
     if (recs.length == 0) {
       txt += '<tr><td>'+count+'"</td><td>';
       txt += '<span class="sound">'+elm.join('</span><span class="sound">')+"</span>";
@@ -155,7 +199,7 @@ function reconstruct() {
   sequences_in_text.forEach(function(element) {
     elements = element.split("\n");
     this_sequence = [];
-    for (i=0; i<elements.length; i++) {
+    for (i = 0; i < elements.length; i += 1) {
       if (i == 0) {
         if (elements[i].indexOf(" > ") != -1){
           [s, t] = elements[i].split(" > ");
@@ -168,10 +212,10 @@ function reconstruct() {
       }
     }
     sequence = {};
-    for (i=0; i<this_sequence.length; i++) {
+    for (i = 0; i < this_sequence.length; i += 1) {
       sequence[tiers[i]] = this_sequence[i].split(" ");
     }
-    for (i=0; i<funcs.length; i++) {
+    for (i = 0; i < funcs.length; i += 1) {
       sequence[funcs[i]] = TIERS[funcs[i]](sequence["segments"]);
     }
     sequences.push(sequence);
@@ -185,7 +229,7 @@ function reconstruct() {
   var rec_dict;
   var tgt, idx;
   sequences.forEach(function(sequence) {
-    recs = CLS.achro_forward(sequence, mark_missing);
+    recs = LAWS["base"].achro_forward(sequence, mark_missing);
     td = "<tr><td>";
     for (i = 0; i < sequence["segments"].length; i += 1) {
       td += '<span class="sound">'+sequence["segments"][i];
@@ -288,11 +332,11 @@ function togglelawidxs(){
 function toggle_bwr(node){
   if (node.innerHTML == "SHOW IMPERFECT"){
     node.innerHTML = "SHOW PERFECT";
-    CLS.bwr_show = "imperfect";
+    SETTINGS.bwr_show = "imperfect";
   }
   else {
     node.innerHTML = "SHOW IMPERFECT";
-    CLS.bwr_show = "perfect";
+    SETTINGS.bwr_show = "perfect";
   }
 
 }
@@ -427,7 +471,7 @@ function show_laws(node){
     law = (
       (parseInt(laws[i]) == 0) 
       ? "[no sound law defined]" 
-      : CLS.raw_laws[parseInt(laws[i])]
+      : LAWS["base"].raw_laws[parseInt(laws[i])]
     );
     law_string += "<tr><td>" + laws[i] + "</td><td>" 
       + law 
@@ -436,7 +480,7 @@ function show_laws(node){
   var falert = document.createElement("div");
   falert.id = "fake";
   falert.className = 'fake_alert';
-  law_string = '<div class="message"><p>Sound Laws Matching the Segment</p><p><table class="soundlawtable"><tr><th>ID</th><th>Sound Law</th></tr>' + law_string + '</table></p>' 
+  law_string = '<div class="message"><p><b>Sound Laws Matching the Segment</b></p><p><table class="soundlawtable"><tr><th>ID</th><th>Sound Law</th></tr>' + law_string + '</table></p>' 
     + '<button class="mybutton" onclick="document.getElementById('+ "'" + 'fake' + "'" + ').remove();">OK</button></div>';
   document.body.appendChild(falert);
   falert.innerHTML = law_string;

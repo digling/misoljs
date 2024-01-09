@@ -114,13 +114,13 @@ C3 > C3
           </td>
         </tr>
         <tr>
-          <th>Ordere of Sound Laws:</th>
+          <!--<th>Order of Sound Laws:</th>
           <td>
             <select class="selector" name="handling" id="reconstruction-order">
               <option value="unordered" selected=true>unordered</option>
               <option value="chronological">chronological</option>
             </select>
-          </td>
+          </td>-->
         </tr>
 
         </table>
@@ -144,15 +144,15 @@ tone
   </div>
   <button class="mybutton" onclick="reconstruct()">APPLY SOUND LAWS</button>
   <button style="display:none" id="lawidxtoggler" class="mybutton" onclick="togglelawidxs();">SHOW LAW IDS</button>
-  <input type="radio">
+      <input type="text" placeholder="filter source" onkeyup="filter_data(this, 'reconstructions_out', 0)" style="width:150px;padding:5px;margin:5px;border: 3px solid lightgray;" />
+      <input type="text" placeholder="filter target" onkeyup="filter_data(this, 'reconstructions_out', 1)" style="width:150px;padding:5px;margin:5px;border: 3px solid lightgray;" />
   <div id="reconstructions" style="display: none">
     <div>
-    <input type="text" placeholder="filter source" onkeyup="filter_data(this, 'reconstructions_out', 0)" style="width:300px" />
-    <input type="text" placeholder="filter target" onkeyup="filter_data(this, 'reconstructions_out', 1)" style="width:300px" />
+
 
       <div class="baseframe" id="reconstructions_out"></div>
     </div>
-    </div>
+  </div>
       </div>
       <div class="footer"></div>
 	  </div>
@@ -163,7 +163,33 @@ tone
 	  <div>
       <div class="tabbed">
         <h3>Backward Reconstruction</h3>
+        <table class="optiontable"><tr>
+            <th>Reconstruction Mode:</th>
+            <td><select class="selector" name="mode" id="reconstruction-mode-bw">
+          <option value="strict" selected=true>strict</option>
+          <option value="ordered" selected=false>ordered</option>
+              </select></td>
+          </tr>
+        <tr>
+          <th>Missing Sound Laws:</th>
+          <td>
+            <select class="selector" name="handling" id="reconstruction-handling-bw">
+              <option value="mark" selected=true>mark</option>
+              <option value="ignore">ignore</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <!--<th>Order of Sound Laws:</th>
+          <td>
+            <select class="selector" name="handling" id="reconstruction-order">
+              <option value="unordered" selected=true>unordered</option>
+              <option value="chronological">chronological</option>
+            </select>
+          </td>-->
+        </tr>
 
+        </table>
   <div style="display: flex">
     <textarea class="inputtext" cols="40" rows="5" id="tiersbw" placeholder="# insert your tier functions here, one per line
 tone

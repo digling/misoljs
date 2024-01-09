@@ -84,8 +84,7 @@
   <![endif]-->
 </head>
 <body>
-<h3 id="components-of-misol-overview">1 Components of MISOL
-(Overview)</h3>
+<h3 id="overview">1 Overview</h3>
 <p>MISOl consists of four major components accessible in four different
 tabs of the web interface. The first component defines sound classes and
 sound laws. The former allow to group sounds into arbitrary units, and
@@ -280,6 +279,15 @@ errors.</p>
 source &gt;target
 source&gt;target</code></pre>
 </div>
+<p>The same strict rules apply for the marker separating the context,
+the slash, which must be preceded and followed by at least one space. So
+again, the following lines will all yield errors and as a result, the
+line will be ignored.</p>
+<div class="badcode">
+<pre class="shell"><code>source &gt; target/ context _
+source &gt; target /context _
+source &gt; target/context</code></pre>
+</div>
 <h4 id="source-and-target-in-sound-laws">3.1 Source and Target in Sound
 Laws</h4>
 <p>Source and target can be either a single sound, sound class, or list
@@ -287,11 +295,11 @@ of sounds (indicated by square brackets) or a sequence of sounds. If a
 sequence of sounds is provided, this will be interpreted internally by
 invoking two or more separate sound laws. Thus, writing</p>
 <div class="mycode">
-<pre><code>a b &gt; [c d / x _ y</code></pre>
+<pre class="shell"><code>a b &gt; [c d] / x _ y</code></pre>
 </div>
 <p>is equivalent to writing</p>
 <div class="mycode">
-<pre><code>a &gt; c / x _ b y
+<pre class="shell"><code>a &gt; c / x _ b y
 b &gt; d / x a _ y</code></pre>
 </div>
 <p>Allowing to define consecutive sounds is thus a mere shortcut but it
@@ -303,24 +311,24 @@ not make a difference. Thus, if you have defined a sound class
 <code>t</code>, and <code>k</code>, the following two statements are
 equivalent:</p>
 <div class="mycode">
-<pre><code>ptk &gt; ptk
+<pre class="shell"><code>ptk &gt; ptk
 [p t k] &gt; [p t k]</code></pre>
 </div>
 <p>The same holds for sequences of sounds:</p>
 <div class="mycode">
-<pre><code>ptk ptk &gt; ptk ptk
+<pre class="shell"><code>ptk ptk &gt; ptk ptk
 [p t k] [p t k] &gt; [p t k] [p t k]</code></pre>
 </div>
 <p>Mixing is also possible.</p>
 <div class="mycode">
-<pre><code>ptk [p t k] &gt; [p t k] ptk</code></pre>
+<pre class="shell"><code>ptk [p t k] &gt; [p t k] ptk</code></pre>
 </div>
 <p>Note, however, that it is essential that the source and the target
 always contain the <em>same amount of sounds</em> and the <em>same
 amount of positions</em>. If you want to indicate the loss of a sound,
 use the <code>-</code> as gap marker:</p>
 <div class="mycode">
-<pre><code>ptk ptk &gt; ptk [- - -]</code></pre>
+<pre class="shell"><code>ptk ptk &gt; ptk [- - -]</code></pre>
 </div>
 <p>Note in this example, that you cannot write a single gap symbol, but
 must assemble a group (or define a sound class with the group before),
@@ -328,7 +336,7 @@ since we require to have one target sound for each source sound and vice
 versa. This means also, that you must repeat a sound when using sound
 class notations to formulate sound laws, where a merger happens.</p>
 <div class="mycode">
-<pre><code>[p t k] &gt; [p p p]</code></pre>
+<pre class="shell"><code>[p t k] &gt; [p p p]</code></pre>
 </div>
 <p>MISOL will in all cases represent sound laws individually, on the
 basis of one source sound corresponding to one target sound in one
@@ -336,23 +344,22 @@ individual context.</p>
 <h4 id="context-in-sound-laws">3.2 Context in Sound Laws</h4>
 <p>The context typically has the form:</p>
 <div class="mycode">
-<pre><code>left_context _ right_context</code></pre>
+<pre class="shell"><code>left_context _ right_context</code></pre>
 </div>
 <p>Here, <code>_</code> represents the source sound. Both left and right
 context can be omitted.</p>
 <div class="mycode">
-<pre><code>left_context _
+<pre class="shell"><code>left_context _
 _ right_context</code></pre>
 </div>
 <p>Context in left and right context is identically defined by a
 segmental representation of the sound sequence proceeds to the left in
 the left context and to the right in the right context. In this way,
 theoretically even very long ranging contexts can be modeled. If one
-wants to change an <code>[</code>s<code>]</code> followed by
-<code>[</code>p, t, k<code>]</code> and a vowel to
-<code>[</code>ʃ<code>]</code>, one can write:</p>
+wants to change an <code>[s]</code> followed by <code>[p, t, k]</code>
+and a vowel to <code>[ʃ]</code>, one can write:</p>
 <div class="mycode">
-<pre><code>s &gt; ʃ / _ [p t k] vowel</code></pre>
+<pre class="shell"><code>s &gt; ʃ / _ [p t k] vowel</code></pre>
 </div>
 <p>Here, the square brackets <code>[</code> and <code>]</code> are used
 to indicate that the three sounds <code>p</code>, <code>t</code>, and
@@ -362,19 +369,383 @@ that would model that an <code>s</code> becomes voiced when followed by
 a vowel and turns into a <code>ʃ</code> when followed by a consonant and
 a vowel, one could define the following sound classes:</p>
 <div class="mycode">
-<pre><code>consonant = p t k b d g s z ʃ
+<pre class="shell"><code>consonant = p t k b d g s z ʃ
 ptk = p t k b d g
 vowel = a e i o u</code></pre>
 </div>
 <p>These could then be used in four sound laws:</p>
 <div class="mycode">
-<pre><code>s &gt; ʃ / _ [p t k] vowel
+<pre class="shell"><code>s &gt; ʃ / _ [p t k] vowel
 s &gt; z / _ vowel
 p t k b d g &gt; p t k b d g
 vowel &gt; vowel</code></pre>
 </div>
 <p>These would turn a word like <code>s t a b</code> into
 <code>ʃ t a b</code> but would turn <code>s a b</code> into
-<code>z a b</code>.</p>
+<code>z a b</code>. Defining groups of sounds with square brackets can
+be done in a very flexible manner, and even sound classes can be placed
+inside brackets in order to form new groups of sounds. One can, for
+example, define two groups of sound classes for voiced and voiceless
+sounds as follows:</p>
+<div class="mycode">
+<pre class="shell"><code>ptk = p t k
+bdg = b d g</code></pre>
+</div>
+<p>These can then be used in combination in a sound law.</p>
+<div class="mycode">
+<pre class="shell"><code>a &gt; e / _ [ptk bdg]</code></pre>
+</div>
+<h4 id="using-tiers-in-sound-laws">3.3 Using Tiers in Sound Laws</h4>
+<p>MISOL is based on the idea that a sound sequence is often best
+represented as a sequence consisting of multiple <em>tiers</em> (similar
+to multi-tiered annotation of texts in linguistic examples, such as
+interlinear-glossed text), that is, a matrix in which different aspects
+of the sequence are treated in segmental form. Tone, for example, can
+often be thought of as representing the whole syllable of a word in some
+tone languages, rather than only one of the sounds in the syllable, or
+the vocalic nucleus.</p>
+<p>MISOL supports using multi-tiered sequences in two ways. First, one
+can define multi-tiered sequences in a very flexible fashion by just
+providing a matrix of symbols with as many tiers as one wants to use
+instead of using only one tier alown. A word in a tonal language,
+consisting of two syllables with two distinct tones, could thus be
+represented in the following form:</p>
+<div class="mycode">
+<pre class="shell"><code>p a ŋ t a n
+¹ ¹ ¹ ² ² ²</code></pre>
+</div>
+<p>In a similar way, one can represent stress in a word, e.g., by using
+the symbol 1 for stressed syllables and the symbol 0 for unstressed
+syllables.</p>
+<div class="mycode">
+<pre class="shell"><code>f a t ə r
+1 1 0 0 0</code></pre>
+</div>
+<p>Different tiers apart from the first segmental tier (called
+<code>segments</code> in MISOL) can be addressed in the context
+definitions in all positions by using the symbol <code>@</code>,
+followed by the name of the tier, in front of the group of sounds
+(marked by square brackets), preceding or following the sound in
+question (or the sound itself). Thus, to indicate that an unstressed
+<code>[t]</code> turns into a <code>[d]</code>, one can write:</p>
+<div class="mycode">
+<pre class="shell"><code>t &gt; d / @stress[0]_</code></pre>
+</div>
+<p>When applying this sound law in forward reconstruction, one must
+provide both tiers (the segments tier and the stress tier) and pass the
+names of these tiers in the text field to the right of the field where
+one inserts the sound sequences to be modified, as shown in Figure
+2.</p>
+<figure>
+<img src="img/example-3-3.png" style="width:90.0%"
+alt="Figure 2: Using multi-tiered sequence representations in sound laws." />
+<figcaption aria-hidden="true">Figure 2: Using multi-tiered sequence
+representations in sound laws.</figcaption>
+</figure>
+<p>The most common use-cases for sound laws with tiers is to define the
+specific tier value that holds for the segment that one intends to
+change (such as we have seen in the example). Other use cases, however,
+are also possible, when thinking of cases where a certain tier value
+holds for preceding or following sounds.</p>
+<p>Instead of actively <em>defining</em> and <em>passing</em> new tiers
+for individual segmental representations of sound sequences, one can
+also make use of inbuilt functions in MISOL that <em>compute</em> tiers
+automatically. An example is again the use of a specific tonal tier
+(called <code>tone</code>), which is computed from the segmental
+representation of tones using superscript letters at the end of each
+syllable. Thus, passing a sound sequence such
+<code>p a ŋ ⁵ d a n ¹</code> will automatically yield a virtual
+representation such as the following one internally in the MISOL
+program:</p>
+<div class="mycode">
+<pre class="shell"><code>p a ŋ ⁵ d a n ¹
+⁵ ⁵ ⁵ ⁵ ¹ ¹ ¹ ¹</code></pre>
+</div>
+<p>As a result, tonal tiers can be used, as long as the tone values are
+indicated by superscript numbers at the end of the syllable in each
+sequence. In order to invoke these tonal tiers, one must indicate this
+actively when using the forward reconstruction method (or the backward
+reconstruction), by adding <code>@tone</code> as an additional tier, as
+shown in Figure 3, assuming the following sound law:</p>
+<div class="mycode">
+<pre class="shell"><code>d &gt; t / @tone[¹]_</code></pre>
+</div>
+<figure>
+<img src="img/example-3-3-b.png" style="width:90.0%"
+alt="Figure 3: Using multi-tiered sequence representations in sound laws with precomputed tiers." />
+<figcaption aria-hidden="true">Figure 3: Using multi-tiered sequence
+representations in sound laws with precomputed tiers.</figcaption>
+</figure>
+<p>Apart from tonal tiers (called <code>tone</code> in MISOL), MISOL
+currently offers two more tiers that can be automated, one tier that
+checks for the nasality of whole words (returning <code>1</code> if a
+words contains a nasal sound or a nasal vowel, and <code>0</code>
+otherwise), and one tier for the initial sound in a word (returning the
+initial sound for each letter in the word, called
+<code>initial</code>).</p>
+<p>As an example, consider the following three sound laws that all use
+one of the three automated tiers.</p>
+<div class="mycode">
+<pre class="shell"><code>d &gt; t / @tone[¹]_
+p &gt; b / @initial[k]_
+b &gt; m / @nasal[1]_</code></pre>
+</div>
+<p>Figure 4 shows, how these can be applied to individual sequences, and
+where in the tool one needs to provide the information on the tiers that
+one intents to use.</p>
+<figure>
+<img src="img/example-3-3-c.png" style="width:90.0%"
+alt="Figure 4: Comparing different precomputed tiers in MISOL." />
+<figcaption aria-hidden="true">Figure 4: Comparing different precomputed
+tiers in MISOL.</figcaption>
+</figure>
+<h3 id="forward-reconstruction-tab-forward-reconstruction">4 Forward
+Reconstruction (Tab “Forward Reconstruction”)</h3>
+<p>Forward reconstruction in MISOL is available in different flavors.
+What all approaches have in common is that MISOL first uses all
+available information on sound classes and sound laws in order to
+construct a virtual context window in which sound laws are supposed to
+take place. This window can be thought of as a multi-tiered sequence
+representation in which context is not handled on the horizontal axis,
+but precomputed for each segment in a sequence and represented in
+individual tiers, each corresponding to one specific context. For a
+sound law by which voiceless initials are voiced in intervocalic
+positions, for example, we would need two tiers apart from the base tier
+in order to represent context to the left of each segment and context to
+the right of each segment. The sound law could be represented as follows
+in MISOL (without using any sound classes), we add additional sound laws
+for completeness.</p>
+<div class="mycode">
+<pre class="shell"><code>[p t k] &gt; [b d g] / [a i u] _ [a i u]
+[b d g] &gt; [b d g]
+[a i u] &gt; [a i u]</code></pre>
+</div>
+<p>When dealing with a new sequence <code>b a p a</code> now, MISOl has
+already inferred from the sound law, that we need two additional tiers,
+and will now represent the new sequence accordingly, by providing for
+each segment its right context and its left context.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Tier</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Segments</td>
+<td>b</td>
+<td>a</td>
+<td>p</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>Segments<code>_</code>Left</td>
+<td>^</td>
+<td>b</td>
+<td>a</td>
+<td>p</td>
+</tr>
+<tr class="odd">
+<td>Segments<code>_</code>Right</td>
+<td>a</td>
+<td>p</td>
+<td>a</td>
+<td>$</td>
+</tr>
+</tbody>
+</table>
+<p>From the sound laws shown above, MISOL will construct vectors that
+represent individual contexts. These sound laws are based on the
+Cartesian product of the different sounds that can appear in the left
+and the right context and thus capture all eventualities, as shown in
+the table below, that shows the individual vectors for the three sound
+laws (in abbreviated form).</p>
+<div class="mytable">
+<table>
+<thead>
+<tr class="header">
+<th>ID</th>
+<th>Law</th>
+<th>Segments</th>
+<th>Segments<code>_</code>Left</th>
+<th>Segments<code>_</code>Right</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>1</td>
+<td>p</td>
+<td>a i u</td>
+<td>a i u</td>
+<td>b</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>1</td>
+<td>t</td>
+<td>a i u</td>
+<td>a i u</td>
+<td>d</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>1</td>
+<td>k</td>
+<td>a i u</td>
+<td>a i u</td>
+<td>g</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>2</td>
+<td>b</td>
+<td>Ø</td>
+<td>Ø</td>
+<td>b</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>2</td>
+<td>d</td>
+<td>Ø</td>
+<td>Ø</td>
+<td>d</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>2</td>
+<td>g</td>
+<td>Ø</td>
+<td>Ø</td>
+<td>g</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>3</td>
+<td>a</td>
+<td>Ø</td>
+<td>Ø</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>3</td>
+<td>i</td>
+<td>Ø</td>
+<td>Ø</td>
+<td>i</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>3</td>
+<td>u</td>
+<td>Ø</td>
+<td>Ø</td>
+<td>u</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>When iterating over each position in the multi-tiered sequence, MISOL
+will try to find which of the laws (as shown in the table) provides a
+vector that matches the current vector in the sequence. The symbol
+<code>Ø</code> is a wildcard marker and matches with every sound. For
+our example, we can contrast the actual tiers with the precomputed
+individual sound laws as shown below.</p>
+<div class="mytable">
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tier</th>
+<th>1</th>
+<th>2</th>
+<th>3</th>
+<th>4</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Segments</td>
+<td>b</td>
+<td>a</td>
+<td>p</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>Segments<code>_</code>Left (Source / Context)</td>
+<td>^ / Ø</td>
+<td>b / Ø</td>
+<td>a / <strong>a</strong> i u</td>
+<td>p / Ø</td>
+</tr>
+<tr class="odd">
+<td>Segments<code>_</code>Right (Source / context)</td>
+<td>a / Ø</td>
+<td>p / Ø</td>
+<td>a / <strong>a</strong> i u</td>
+<td>$ / Ø</td>
+</tr>
+<tr class="even">
+<td>Sound Law / ID</td>
+<td>2 / 4</td>
+<td>3 / 7</td>
+<td>1 / 1</td>
+<td>3 / 7</td>
+</tr>
+<tr class="odd">
+<td>Target</td>
+<td>b</td>
+<td>a</td>
+<td>b</td>
+<td>a</td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>This is the major procedure used by MISOL in order to turn one source
+sequence into one target sequence. The method (1) precomputes the
+context for the sequence, which allows it to (2) iterate over each
+position regardless of the order, searching for matching patterns and
+their corresponding output.</p>
+<h4 id="strict-and-ordered-reconstruction-mode">4.1 Strict and Ordered
+Reconstruction Mode</h4>
+<p>The procedure as outlined here is what is called the “strict” mode in
+MISOL when using forward reconstruction. It is called “strict” with
+respect to the mode of reconstruction, since it does not tolerate that
+different sound laws match the same context and yield different output
+(MISOL will explicitly mark these cases). Users can choose between the
+strict mode and the “ordered” mode, in which the matching process is
+modified in such a way that in the case of competing sound laws, the law
+that was defined first, wins. This makes coding sound laws much more
+convenient, since one can first define a very strict law and later
+define a general law that would hold for all other cases not touched by
+this first law.</p>
+<div class="mycode">
+<pre class="shell"><code>s &gt; ʃ / _ [p t k]
+s &gt; s</code></pre>
+</div>
+<p>When passing a sequence <code>s p a s a</code> to this sound law, it
+would yield the output <code>s|ʃ p a s a</code> in strict mode, and
+<code>ʃ p a s a</code> in ordered mode, using the pipe to indicate
+competing sounds (see <a
+href="https://aclanthology.org/2023.lchange-1.3">List et al. 2023</a>
+for this notation).</p>
+<h4 id="treatment-of-missing-sound-laws">4.2 Treatment of Missing Sound
+Laws</h4>
+<h3 id="backward-reconstruction">5 Backward Reconstruction</h3>
+<h3 id="import-and-export">6 Import and Export</h3>
 </body>
 </html>
