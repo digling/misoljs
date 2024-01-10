@@ -34,7 +34,7 @@ function loaddata() {
     }
     if (element.indexOf(">") != -1 && element[0] != "#") {
       if (sound_law_layers.length == 0) {
-        sound_law_layers.push(["Target"]);
+        sound_law_layers.push("Base");
         sound_laws.push([]);
         sound_law_idx = 0;
       }
@@ -186,9 +186,10 @@ function reconstruct() {
   var tiers = [];
   var funcs = [];
   var sequences = [];
+  var new_sequences, new_sequence;
   var desequences = {};
   var s, t;
-  var sequence, i, j, this_sequence;
+  var sequence, i, j, k, l, this_sequence;
   var elements;
   var td;
   var rec_segs;
@@ -224,78 +225,183 @@ function reconstruct() {
     }
     sequences.push(sequence);
   });
-  var text = '<table class="basictable"><tr><th>Source</th><th>'
-    + LAWS["layer_labels"].join("</th><th>") + "</th>";
-  if (Object.keys(desequences).length != 0) {
-    text += "<th>Expected</th>";
+
+  /* iterate over sequences, transform them, step by step */
+  var all_sequences = {};
+  all_sequences["Source"] = [];
+  var all_laws = {};
+
+  sequences.forEach(element => all_sequences["Source"].push(element["segments"]));
+  for (i = 0; i < LAWS["layer_labels"].length; i += 1) {
+    all_sequences[LAWS["layer_labels"][i]] = [];
   }
-  text += "</tr>";
-  var recs;
-  var rec_dict;
-  var tgt, idx;
-  sequences.forEach(function(sequence) {
-    recs = LAWS["base"].achro_forward(sequence, mark_missing);
-    td = "<tr><td>";
-    for (i = 0; i < sequence["segments"].length; i += 1) {
-      td += '<span class="sound">'+sequence["segments"][i];
-      for (j = 1; j < tiers.length; j += 1) {
-        td += '<sup class="tier" title="Tier '+tiers[j]+'">'+sequence[tiers[j]][i]+"</sup>";
-      }
-      td += "</span>";
-      //td += '<span style="width:20px;background-color:lightgray;display:table-cell;">.</span>';
-    }
-    td += "</td><td>";
-    for (i = 0; i < recs.length; i += 1) {
-      rec_dict = {};
-      for (j = 0; j < recs[i].length; j += 1) {
-        if (recs[i][j][0] in rec_dict) {
-          rec_dict[recs[i][j][0]].push(recs[i][j][1]);
+  var current_sequences = sequences;
+  for (i = 0; i < LAWS["layer_labels"].length; i += 1) {
+    new_sequences = [];
+    all_sequences[LAWS["layer_labels"][i]] = [];
+    all_laws[LAWS["layer_labels"][i]] = [];
+    for (j = 0; j < current_sequences.length; j += 1) {
+      recs = LAWS["layers"][LAWS["layer_labels"][i]].achro_forward(current_sequences[j], mark_missing);
+      var reconstruction = [];
+      var laws = [];
+      for (k = 0; k < current_sequences[j]["segments"].length; k += 1) {
+        /* check recs[k]["sequence"] to determine fate of tier */
+        if (strict_mode) {
         }
         else {
-          rec_dict[recs[i][j][0]] = [recs[i][j][1]];
+          reconstruction.push(recs[k][0][0]);
+          laws.push(recs[k][0][1]);
         }
       }
-      rec_segs = [];
-      /* different output depending on mode strict or ordered */
-      if (strict_mode) {
-        for (tgt in rec_dict) {
-          rec_segs.push('<span class="sound">'+tgt+'<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">'+rec_dict[tgt].join(",")+"</sup></span>");
-        }
-        if (rec_segs.length > 1) {
-          td += '<span class="unifiedsound">'+rec_segs.join('<span class="pipe"></span>')+'</span>';
-        }
-        else {
-          td += rec_segs[0];
-        }
-      }
-      else {
-        for (tgt in rec_dict) {
-          rec_segs.push('<span class="sound">' + tgt + '<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">' + rec_dict[tgt][0] + "</sup></span>");
-        }
-        td += rec_segs[0];
-      }
-    }
-    td += "</td>";
-    /* compare against attested sequences */
-    if (Object.keys(desequences).length != 0) {
-      t = desequences[sequence["segments"].join(" ")];
-      if (typeof t == "undefined") {
-        t = ["?"];
-      }
-      else {
-        t = t.trim().split(" ");
-        for ( i = 0; i < recs.length; i += 1) {
-          if (recs[i][0][0] != t[i]) {
-            t[i] = "?"+t[i];
+      var new_sequence = [];
+      for (k = 0; k < current_sequences[j]["segments"].length; k += 1) {
+        /* check for fate */
+        if (reconstruction[k] != "-") {
+          if (reconstruction[k][0].indexOf(".") == -1) {
+            new_sequence.push(reconstruction[k]);
+          }
+          else {
+            new_sequence.push(... reconstruction[k].split("."));
           }
         }
       }
-      td += '<td><span class="sound">'+t.join('</span><span class="sound">')+'</span></td>';
+      new_sequences.push({"segments": new_sequence});
+      all_sequences[LAWS["layer_labels"][i]].push(reconstruction);
+      all_laws[LAWS["layer_labels"][i]].push(laws);
     }
-    td += "</tr>";
-    text += td;
-  });
-  text += "</table>";
+    console.log("new sequences", new_sequences);
+    current_sequences = new_sequences;
+  }
+  all_sequences["Output"] = []
+  var last_layer, segment;
+  var last_idx = LAWS["layer_labels"][LAWS["layer_labels"].length - 1];
+
+  for (k = 0; last_layer = all_sequences[last_idx][k]; k += 1) {
+    all_sequences["Output"].push([]);
+    for (l = 0; segment = last_layer[l]; l += 1) {
+      if (segment != "-") {
+        if (segment.indexOf(".") != -1){
+          all_sequences["Output"][k].push(...segment.split("."));
+        }
+        else {
+          all_sequences["Output"][k].push(segment);
+        }
+      }
+    }
+  }
+  var text = '<table class="basictable"><tr><th>Source</th><th>' 
+    + LAWS["layer_labels"].join("</th><th>") + "</th><th>Output</th>";
+  
+  var layers = ["Source"];
+  layers.push(...LAWS["layer_labels"]);
+  layers.push("Output");
+
+  if (Object.keys(desequences).length != 0) {
+    text += "<th>Expected</th>";
+    all_sequences["Expected"] = [];
+    sequences.forEach(element => all_sequences["Expected"].push(
+      desequences[element["segments"].join(" ")].split(" ")));
+    for (i = 0; i < all_sequences["Expected"].length; i += 1) {
+      all_sequences["Expected"][i] = compare(
+        all_sequences["Output"][i], all_sequences["Expected"][i]);
+    }
+    layers.push("Expected");
+  }
+  text += "</tr>";
+  for (i = 0; i < all_sequences["Output"].length; i += 1) {
+    text += '<tr>';
+    for (j = 0; layer = layers[j]; j += 1) {
+      text += '<td>';
+      for (k = 0; k < all_sequences[layer][i].length; k += 1) {
+        text += '<span class="sound">';
+        text += all_sequences[layer][i][k];
+        if (LAWS["layer_labels"].indexOf(layer) != -1) {
+          if (typeof all_laws[layer][i][k] == "object") {
+            var segment = all_laws[layer][i][k].join(',');
+          }
+          else {
+            var segment = all_laws[layer][i][k];
+          }
+          text += '<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">'
+            + segment
+            + "</sup>";
+        }
+        text += '</span>';
+      }
+      text += '</td>';
+    }
+    text += "</tr>";
+  }
+  text += '</table>';
+  console.log("all seqs", all_sequences);
+
+
+  // var recs;
+  // var rec_dict;
+  // var tgt, idx;
+  // sequences.forEach(function(sequence) {
+  //   recs = LAWS["base"].achro_forward(sequence, mark_missing);
+  //   td = "<tr><td>";
+  //   for (i = 0; i < sequence["segments"].length; i += 1) {
+  //     td += '<span class="sound">'+sequence["segments"][i];
+  //     for (j = 1; j < tiers.length; j += 1) {
+  //       td += '<sup class="tier" title="Tier '+tiers[j]+'">'+sequence[tiers[j]][i]+"</sup>";
+  //     }
+  //     td += "</span>";
+  //     //td += '<span style="width:20px;background-color:lightgray;display:table-cell;">.</span>';
+  //   }
+  //   td += "</td><td>";
+  //   for (i = 0; i < recs.length; i += 1) {
+  //     rec_dict = {};
+  //     for (j = 0; j < recs[i].length; j += 1) {
+  //       if (recs[i][j][0] in rec_dict) {
+  //         rec_dict[recs[i][j][0]].push(recs[i][j][1]);
+  //       }
+  //       else {
+  //         rec_dict[recs[i][j][0]] = [recs[i][j][1]];
+  //       }
+  //     }
+  //     rec_segs = [];
+  //     /* different output depending on mode strict or ordered */
+  //     if (strict_mode) {
+  //       for (tgt in rec_dict) {
+  //         rec_segs.push('<span class="sound">'+tgt+'<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">'+rec_dict[tgt].join(",")+"</sup></span>");
+  //       }
+  //       if (rec_segs.length > 1) {
+  //         td += '<span class="unifiedsound">'+rec_segs.join('<span class="pipe"></span>')+'</span>';
+  //       }
+  //       else {
+  //         td += rec_segs[0];
+  //       }
+  //     }
+  //     else {
+  //       for (tgt in rec_dict) {
+  //         rec_segs.push('<span class="sound">' + tgt + '<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">' + rec_dict[tgt][0] + "</sup></span>");
+  //       }
+  //       td += rec_segs[0];
+  //     }
+  //   }
+  //   td += "</td>";
+  //   /* compare against attested sequences */
+  //   if (Object.keys(desequences).length != 0) {
+  //     t = desequences[sequence["segments"].join(" ")];
+  //     if (typeof t == "undefined") {
+  //       t = ["?"];
+  //     }
+  //     else {
+  //       t = t.trim().split(" ");
+  //       for ( i = 0; i < recs.length; i += 1) {
+  //         if (recs[i][0][0] != t[i]) {
+  //           t[i] = "?"+t[i];
+  //         }
+  //       }
+  //     }
+  //     td += '<td><span class="sound">'+t.join('</span><span class="sound">')+'</span></td>';
+  //   }
+  //   td += "</tr>";
+  //   text += td;
+  // });
+  // text += "</table>";
   document.getElementById("reconstructions_out").innerHTML = text;
   highlight_errors()
 }
@@ -493,4 +599,157 @@ function show_laws(node){
 }
 
 
+function editList(seqA,seqB)
+{
+
+  if(seqA.length == 0 || seqB.length == 0)
+  {
+    return;
+  }
+
+  var alen = seqA.length;
+  var blen = seqB.length;
+
+  var matrix = [];
+  for(var i=0;i<alen+1;i++)
+  {
+    var inline = [];
+    for(var j=0;j<blen+1;j++)
+    {
+      inline.push(0);
+    }
+    matrix.push(inline);
+  }
+  
+  // initialize matrix
+  for(i=1;i<blen+1;i++)
+  {
+    matrix[0][i] = i;
+  }
+  for(i=1;i<alen+1;i++)
+  {
+    matrix[i][0] = i;
+  }
+
+  var traceback = [];
+  for(var i=0;i<alen+1;i++)
+  {
+    var inline = [];
+    for(var j=0;j<blen+1;j++)
+    {
+      inline.push(0);
+    }
+    traceback.push(inline);
+  }
+  
+
+  // initialize traceback
+  for(i=1;i<blen+1;i++)
+  {
+    traceback[0][i] = 2;
+  }
+  for(i=1;i<alen+1;i++)
+  {
+    traceback[i][0] = 1;
+  }
+
+  // iterate
+  for(i=1;i<alen+1;i++)
+  {
+    for(j=1;j<blen+1;j++)
+    {
+      var a = seqA[i-1];
+      var b = seqB[j-1];
+      
+      if(a == b)
+      {
+        var dist = matrix[i-1][j-1];
+      }
+      else if(a.indexOf(b.slice(0,1)) != -1 || b.indexOf(a.slice(0,1)) != -1)
+      {
+        var dist = matrix[i-1][j-1]+0.5;
+      }
+      else
+      {
+        var dist = matrix[i-1][j-1]+1;
+      }
+      
+      var gapA = matrix[i-1][j]+1;
+      var gapB = matrix[i][j-1]+1;
+
+      if(dist < gapA && dist < gapB)
+      {
+        matrix[i][j] = dist;
+      }
+      else if(gapA < gapB)
+      {
+        matrix[i][j] = gapA ;
+        traceback[i][j] = 1;
+      }
+      else
+      {
+        matrix[i][j] = gapB;
+        traceback[i][j] = 2;
+      }
+      
+    }
+  }
+  
+  // no other stupid language needs this line apart from JS!!!
+  var i = matrix.length-1;
+  var j = matrix[0].length-1;
+
+  // get edit-dist
+  var ED = matrix[i][j];
+
+  // get the alignment //
+  var almA = [];
+  var almB = [];
+
+  while(i > 0 || j > 0)
+  {
+    if(traceback[i][j] == 0)
+    {
+      almA.push(seqA[i-1]);
+      almB.push(seqB[j-1]);
+      i--;
+      j--
+    }
+    else if(traceback[i][j] == 1)
+    {
+      almA.push(seqA[i-1]);
+      almB.push("-");
+      i--;
+    }
+    else
+    {
+      almA.push("-");
+      almB.push(seqB[j-1]);
+      j--
+    }   
+  }
+  
+  /* reverse alignments */
+  almA = almA.reverse();
+  almB = almB.reverse();
+  return [almA,almB,ED];
+}
+
+/* should contain edit distance now */
+function compare(a, b) {
+  var i;
+  var out = [];
+  var almA, almB, d;
+  [almA, almB, d] = editList(a, b);
+  console.log("edit", almA.join(" "), almB.join(" "), d);
+  for (i = 0; i < almA.length; i += 1) {
+    if (almA[i] == almB[i]) {
+      out.push(almB[i]);
+    }
+    else {
+      out.push("!" + almB[i]);
+    }
+  }
+  return out;
+}
 
