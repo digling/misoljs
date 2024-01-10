@@ -144,10 +144,10 @@
 }
 
 .pipe {
-  background-color: black;
-  color: white;
-  width: 3px;
-  display: table-cell;
+  //background-color: black;
+  color: black;
+  width: 1px;
+  display: inline;
 }
 
 .lawidx {

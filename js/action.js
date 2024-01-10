@@ -92,6 +92,15 @@ function loadsampledata() {
   document.getElementById("sequences").value="p a ⁵⁵\n\nd u ²¹⁴\n\nd u ⁵⁵";
 }
 
+function loadsampledata2() {
+
+  document.getElementById("sound_laws").value = "C1 > C1\nC3 > C2 / @tone[²¹⁴]_\nC3 > C1 / @tone[⁵⁵ ⁵¹ ³⁵]_\nC2 > C2\nV > V\nTONE > TONE\nRHYME > [V V V]";
+  document.getElementById("sound_classes").value = "P = p pʰ b\nK = k kʰ g\nT = t tʰ d\nC1 = p t k\nC2 = pʰ tʰ kʰ\nC3 = b d g\nTONE = ⁵⁵ ³⁵ ²¹⁴ ⁵¹\nV = a e i o u\nYIN = ⁵⁵ ³⁵ ⁵¹\nYANG = ²¹⁴\nGAP = - - -\nRHYMEP = a.p e.p i.p o.p u.p\nRHYMET = a.t e.t i.t o.t u.t\nRHYMEK = a.k e.k i.k o.k u.k\nRHYME = RHYMEP RHYMET RHYMEK";
+  loaddata();
+  document.getElementById("tiers").value = "segments\n@tone";
+  document.getElementById("sequences").value="p a ⁵⁵\n\nd u ²¹⁴\n\nd u ⁵⁵";
+}
+
 function backwards() {
   document.getElementById("reconstructions-bw").style.display = "flex";
   var strict_mode = (
@@ -230,6 +239,8 @@ function reconstruct() {
   var all_sequences = {};
   all_sequences["Source"] = [];
   var all_laws = {};
+  
+  var reconstruction, laws, variants, tmp_sounds, tmp_laws, new_sequence;
 
   sequences.forEach(element => all_sequences["Source"].push(element["segments"]));
   for (i = 0; i < LAWS["layer_labels"].length; i += 1) {
@@ -242,18 +253,38 @@ function reconstruct() {
     all_laws[LAWS["layer_labels"][i]] = [];
     for (j = 0; j < current_sequences.length; j += 1) {
       recs = LAWS["layers"][LAWS["layer_labels"][i]].achro_forward(current_sequences[j], mark_missing);
-      var reconstruction = [];
-      var laws = [];
+      reconstruction = [];
+      laws = [];
       for (k = 0; k < current_sequences[j]["segments"].length; k += 1) {
         /* check recs[k]["sequence"] to determine fate of tier */
         if (strict_mode) {
+          /* assemble alternatives */
+          variant_dict = {};
+          for (n = 0; n < recs[k].length; n += 1) {
+            if (recs[k][n][0] in variant_dict) {
+              variant_dict[recs[k][n][0]].push(recs[k][n][1]);
+            }
+            else {
+              variant_dict[recs[k][n][0]] = [recs[k][n][1]];
+            }
+          }
+          tmp_sounds = [];
+          tmp_laws = [];
+          for (key in variant_dict) {
+            tmp_sounds.push(key);
+            tmp_laws.push(variant_dict[key].join(","));
+          }
+          reconstruction.push(tmp_sounds);
+          laws.push(tmp_laws);
+          console.log(variant_dict, tmp_sounds, tmp_laws);
         }
         else {
           reconstruction.push(recs[k][0][0]);
           laws.push(recs[k][0][1]);
         }
       }
-      var new_sequence = [];
+
+      new_sequence = [];
       for (k = 0; k < current_sequences[j]["segments"].length; k += 1) {
         /* check for fate */
         if (reconstruction[k] != "-") {
@@ -295,6 +326,7 @@ function reconstruct() {
   var layers = ["Source"];
   layers.push(...LAWS["layer_labels"]);
   layers.push("Output");
+  var segment;
 
   if (Object.keys(desequences).length != 0) {
     text += "<th>Expected</th>";
@@ -313,20 +345,39 @@ function reconstruct() {
     for (j = 0; layer = layers[j]; j += 1) {
       text += '<td>';
       for (k = 0; k < all_sequences[layer][i].length; k += 1) {
-        text += '<span class="sound">';
-        text += all_sequences[layer][i][k];
-        if (LAWS["layer_labels"].indexOf(layer) != -1) {
-          if (typeof all_laws[layer][i][k] == "object") {
-            var segment = all_laws[layer][i][k].join(',');
+        //text += '<span class="sound">';
+        if (all_sequences[layer][i][k].length > 1) {
+          tmp_text = '<span class="sound unifiedsound">';
+          for (n = 0; n < all_sequences[layer][i][k].length; n += 1) {
+            tmp_text += all_sequences[layer][i][k][n];
+            if (LAWS["layer_labels"].indexOf(layer) != -1) {
+              tmp_text += '<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">';
+              tmp_text += all_laws[layer][i][k][n];
+              tmp_text += "</sup>";
+            }
+            if (n < all_sequences[layer][i][k].length - 1) {
+              tmp_text += '<span class="pipe">|</span>';
+            }
           }
-          else {
-            var segment = all_laws[layer][i][k];
-          }
-          text += '<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">'
-            + segment
-            + "</sup>";
+          tmp_text += "</span>";
+          text += tmp_text;
         }
-        text += '</span>';
+        else {
+          text += '<span class="sound">';
+          text += all_sequences[layer][i][k];
+          if (LAWS["layer_labels"].indexOf(layer) != -1) {
+            if (all_laws[layer][i][k].length == 1) {
+              segment = all_laws[layer][i][k].join(',');
+            }
+            else {
+              segment = all_laws[layer][i][k];
+            }
+            text += '<sup onclick="show_laws(this);" style="display:none" title="Sound Law Indices" class="lawidx">'
+              + segment
+              + "</sup>";
+          }
+          text += '</span>';
+        }
       }
       text += '</td>';
     }
