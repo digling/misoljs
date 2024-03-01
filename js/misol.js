@@ -514,16 +514,29 @@ class SoundClasses {
     /* iterate over all laws to get the target to source array */
     this.target2source = {};
     var sound, tiers, tier;
+    var target_sounds = [];
     for (sound in this.all_laws) {
+      /* add identity relation */
       tiers = this.all_laws[sound];
-      for (i=0; i<tiers.length; i++) {
+      for (i = 0; i < tiers.length; i += 1) {
         tier = tiers[i];
+        target_sounds.push(tier["target"]);
         if (tier["target"] in this.target2source && this.target2source[tier["target"]].indexOf(tier["source"]) == -1) {
           this.target2source[tier["target"]].push(tier["source"]);
         }
+
         else {
           this.target2source[tier["target"]] = [tier["source"]];
         }
+      }
+    }
+    /* add missing target sounds */
+    for (i = 0; i < target_sounds.length; i += 1) {
+      if (target_sounds[i] in this.target2source && this.target2source[target_sounds[i]].indexOf(target_sounds[i]) == -1) {
+        this.target2source[target_sounds[i]].push(target_sounds[i]);
+      }
+      else if (!(target_sounds[i] in this.target2source)) {
+        this.target2source[target_sounds[i]] = [target_sounds[i]];
       }
     }
     /* process tiers to identify the basic encoding routine */

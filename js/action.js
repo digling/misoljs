@@ -303,6 +303,7 @@ function reconstruct() {
         }
       }
       new_sequences.push({"segments": new_sequence});
+      /* +++ here the tier must be transferred +++ */
       all_sequences[LAWS["layer_labels"][i]].push(reconstruction);
       all_laws[LAWS["layer_labels"][i]].push(laws);
     }
