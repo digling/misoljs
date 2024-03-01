@@ -287,12 +287,18 @@ function reconstruct() {
       new_sequence = [];
       for (k = 0; k < current_sequences[j]["segments"].length; k += 1) {
         /* check for fate */
-        if (reconstruction[k] != "-") {
-          if (reconstruction[k][0].indexOf(".") == -1) {
-            new_sequence.push(reconstruction[k]);
+        if (typeof reconstruction[k] == "object" && reconstruction[k].length > 1) {
+          segment = reconstruction[k].join('|');
+        }
+        else {
+          segment = reconstruction[k];
+        }
+        if (segment != "-") {
+          if (segment.indexOf(".") == -1) {
+            new_sequence.push(segment);
           }
           else {
-            new_sequence.push(... reconstruction[k].split("."));
+            new_sequence.push(... segment.split("."));
           }
         }
       }
@@ -300,7 +306,7 @@ function reconstruct() {
       all_sequences[LAWS["layer_labels"][i]].push(reconstruction);
       all_laws[LAWS["layer_labels"][i]].push(laws);
     }
-    console.log("new sequences", new_sequences);
+    //console.log("new sequences", new_sequences);
     current_sequences = new_sequences;
   }
   all_sequences["Output"] = []
@@ -345,8 +351,7 @@ function reconstruct() {
     for (j = 0; layer = layers[j]; j += 1) {
       text += '<td>';
       for (k = 0; k < all_sequences[layer][i].length; k += 1) {
-        //text += '<span class="sound">';
-        if (all_sequences[layer][i][k].length > 1) {
+        if (all_sequences[layer][i][k].length > 1 && typeof all_sequences[layer][i][k] == "object") {
           tmp_text = '<span class="sound unifiedsound">';
           for (n = 0; n < all_sequences[layer][i][k].length; n += 1) {
             tmp_text += all_sequences[layer][i][k][n];
@@ -384,7 +389,7 @@ function reconstruct() {
     text += "</tr>";
   }
   text += '</table>';
-  console.log("all seqs", all_sequences);
+  //console.log("all seqs", all_sequences);
 
 
   // var recs;
