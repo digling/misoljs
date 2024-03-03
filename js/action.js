@@ -247,6 +247,7 @@ function reconstruct() {
     all_sequences[LAWS["layer_labels"][i]] = [];
   }
   var current_sequences = sequences;
+  var new_multitier;
   for (i = 0; i < LAWS["layer_labels"].length; i += 1) {
     new_sequences = [];
     all_sequences[LAWS["layer_labels"][i]] = [];
@@ -302,7 +303,12 @@ function reconstruct() {
           }
         }
       }
-      new_sequences.push({"segments": new_sequence});
+      new_multitier = {"segments": new_sequence};
+      for (k = 0; k < funcs.length; k += 1) {
+        new_multitier[funcs[k]] = TIERS[funcs[k]](new_multitier["segments"]);
+      }
+
+      new_sequences.push(new_multitier);
       /* +++ here the tier must be transferred +++ */
       all_sequences[LAWS["layer_labels"][i]].push(reconstruction);
       all_laws[LAWS["layer_labels"][i]].push(laws);
