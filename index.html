@@ -39,13 +39,13 @@
 	  <label class="main" for="tabreiter-0-0">Home</label>
 	  <div>
       <div class="tabbed">  
-        <h3>Modeling and Inferring Sound Laws: Overview</h3>
+        <h3>Modeling and Inducing Sound Laws: Overview</h3>
         This web application allows you to define your own sound laws and apply them to your proto-forms in order to simulate regular sound change from an ancestral language to a descendant language. 
         <br>
         <img src="img/misol.png" style="width:200px;display:float;" />
         <br>
         <b>How to cite:</b><br>
-        <div style="background-color:aliceblue;padding:5px;border-radius:5px;border:1px dotted gray;">List, Johann-Mattis (2023): <i>MISoL: Modeling and Inferring Sound Laws with an Interactive Web-Application [Software Tool: Version 0.2].</i>Passau: Chair of Multilingual Computational Linguistics at the University of Passau. <a href="https://lingpy.org/misol/">https://lingpy.org/misol/</a>.</div>
+        <div style="background-color:aliceblue;padding:5px;border-radius:5px;border:1px dotted gray;">List, Johann-Mattis (2024): <i>MISoL: Modeling and Inducing Sound Laws with an Interactive Web-Application [Software Tool: Version 0.2]. </i>Passau: Chair of Multilingual Computational Linguistics at the University of Passau. <a href="https://misol.edictor.org">https://misol.edictor.org</a>.</div>
 
 	  </div>
     <div class="footer"></div>
@@ -191,12 +191,13 @@ tone
 
         </table>
   <div style="display: flex">
-    <textarea class="inputtext" cols="40" rows="5" id="tiersbw" placeholder="# insert your tier functions here, one per line
-tone
-"></textarea>
     <textarea class="inputtext" cols="40" rows="5" id="sequencesbw" placeholder="# insert your sequence, separated by a blank line
 p a
 d u
+"></textarea>
+
+    <textarea class="inputtext" cols="20" rows="5" id="tiersbw" placeholder="# insert your tier functions here, one per line
+tone
 "></textarea>
   </div>
   <button class="mybutton" onclick="backwards()">FIND PROTO-FORMS</button>
