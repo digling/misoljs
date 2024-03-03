@@ -720,24 +720,13 @@ TIERS.nasal = function(sequence){
 TIERS.stress = function(sequence){
   var i, segment;
   var out = [];
-  var stressed = false;
-  var was_stressed = false;
-  for (i=0; segment=sequence[i]; i++) {
-    if (segment[0] == "ˈ") {
-      stressed = true;
-      was_stressed = true;
-      out.push("2");
+  var stress = "";
+  for (i = 0; i < sequence.length; i += 1) {
+    segment = sequence[i];
+    if ("ˈ',ˌ◡–".indexOf(segment[0]) != -1) {
+      stress = segment;
     }
-    else if (segment[segment.length-1] == "ˈ") {
-      stressed = false;
-      out.push("2");
-    }
-    else if (was_stressed) {
-      out.push("1");
-    }
-    else {
-      out.push("0");
-    }
+    out.push(stress);
   }
   return out;
 };

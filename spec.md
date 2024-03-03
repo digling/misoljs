@@ -324,6 +324,18 @@ formulate sound laws, where a merger happens.
 
 </div>
 
+If you want to indicate that one sound turns into two sounds, which could happen in the case of epenthesis, you must provide the two sounds that replace the one sound in the original separated by a dot, as follows:
+
+<div class="mycode">
+
+```shell
+n > n.d / _ r [a e i o u]
+```
+
+</div>
+
+MISOL will internally replace the sound by the sequence `n.d` in the respective context, but the final output will provide the sound in merged form. 
+ 
 MISOL will in all cases represent sound laws individually, on the basis of one source sound corresponding to one target sound in one individual context. 
 
 
@@ -481,7 +493,7 @@ d > t / @tone[¹]_
 
 ![Figure 3: Using multi-tiered sequence representations in sound laws with precomputed tiers.](img/example-3-3-b.png){ width=90% }
 
-Apart from tonal tiers (called `tone` in MISOL), MISOL currently offers two more tiers that can be automated, one tier that checks for the nasality of whole words (returning `1` if a words contains a nasal sound or a nasal vowel, and `0` otherwise), and one tier for the initial sound in a word (returning the initial sound for each letter in the word, called `initial`).
+Apart from tonal tiers (called `tone` in MISOL), MISOL currently offers three more tiers that can be automated, one tier that checks for the nasality of whole words (returning `1` if a words contains a nasal sound or a nasal vowel, and `0` otherwise), one tier for the initial sound in a word (returning the initial sound for each letter in the word, called `initial`), and one tier that handles the stress patterns of the word (requiring a specific annotation that uses stress markers to mark syllable boundaries in an explicit manner).
 
 As an example, consider the following three sound laws that all use one of the three automated tiers.
 
@@ -498,6 +510,38 @@ b > m / @nasal[1]_
 Figure 4 shows, how these can be applied to individual sequences, and where in the tool one needs to provide the information on the tiers that one intents to use.
 
 ![Figure 4: Comparing different precomputed tiers in MISOL.](img/example-3-3-c.png){ width=90% }
+
+In order to handle stress, stress must be marked in a specific fashion that differs from the current handling in the International Phonetic Alphabet. First, stress markers must be placed in front of every syllable in a word, not only in front of stressed syllabes. Second, stress markers receive their own slot, they should be separated by a space from the rest of the sequence. Third, stress markers must start with either the IPA stress marker `ˈ` or the quotation mark `'` (for convenience), or the secondary stress marker `ˌ`, but stress markers can be expanded by adding arbitrary symbols, allowing to mark different kinds of stress, such as "unstressed by following a stressed syllable" (which would be needed for Verner's law. Thus, when defining the following sound law, one can handle Verner's law as well, by passing the sequence `ˈ f a ˌ t e r`, in which we assume that the secondary stress marker refers to unstressed syllables following a stressed syllable.
+
+<div class="mycode">
+
+```shell
+[p t k] > [f θ x] / @stress[ˌ]_
+```
+
+</div>
+
+#### 3.4 Consecutive Sound Laws
+
+The basic idea of MISOL is that sound laws often happen at the same time. For this reason, MISOL does not chain individual sound laws in order in order to let them derive a new sequence to which the next sound law is applied, but rather applies them all at once to the original context. 
+
+In most cases, these synchronous sound laws are sufficient and much easier to handle than consecutive sound laws. In some cases, however, it is clear that sound laws were active at different stages, called *layer* in MISOL. Thus, MISOl allows you to "layer" your sound laws by assigning them to different layers which are then executed in the order in which you provide them. As a simple example, consider how Latin *generu-* became *gendre* in French. While one could model this change in synchronous sound laws in many ways (for example also by just replacing *e* by a *d* when occurring between *n* and *r*), it is much easier and also closer to actual sound change to think of two different major changes that took place here. First, *generu* becomes *genru*, and then the epenthetic *n* emerges.
+ 
+In order to model these sound laws in MISOL, you must assign individual sets of sound laws to a layer, by adding the layer name, placed in an equal sign, separated with a space, to the left and the right of the layer label.
+
+<div class="mycode">
+
+```shell
+= Layer 1 =
+e > - / n _ r
+
+= Layer 2 =
+n > n.d / _ r [a e i o u]
+```
+
+</div>
+
+When applying these sound laws, MISOL will display all internal results, allowing you to track all intermediate forms that lead to the final form proposed by the tool, according to your sound laws.
 
 
 ### 4 Forward Reconstruction (Tab "Forward Reconstruction")
@@ -576,6 +620,22 @@ s > s
 When passing a sequence `s p a s a` to this sound law, it would yield the output `s|ʃ p a s a` in strict mode, and `ʃ p a s a` in ordered mode, using the pipe to indicate competing sounds (see [List et al. 2023](https://aclanthology.org/2023.lchange-1.3) for this notation). 
 
 #### 4.2 Treatment of Missing Sound Laws
+
+Scholars typically omit the "boring" sound laws from their descriptions, specifically those cases of sound change, where no sound change happens. Thus, we rarely find a sound law as the following in the literature.
+
+<div class="mycode">
+
+```shell
+t > t
+```
+
+</div>
+
+MISOL tolerates the omission of not providing sound laws in those cases where sounds don't change. The *Forward Reconstruction* tab offers users to select whether missing sound laws should be *marked* or *ignored*. If they are ignored, the original sound is used unchanged. If they are marked, the sound will be preceded by an exclamation mark and marked in red. 
+
+#### 4.3 Tiers in Consecutive Sound Change Processes
+
+At the moment, you can only pass explicit tiers (such as accent) once. Since their main purpose is to be able to explain the initial change, they cannot be used in consecutive sound law processes, since this would require us to add a routine by which tiers from a source word turn into tiers from a target word. +++Using computed tiers is not yet implemented by will be available at some point.+++
 
 
 ### 5 Backward Reconstruction

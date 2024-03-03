@@ -3,6 +3,8 @@ LAWS["layers"] = {};
 LAWS["layer_lables"] = [];
 LAWS["base"] = {};
 
+var MARKERS = ["'", "ˈ", "ˌ", ",", "+", "◡", "–"];
+
 var SETTINGS = {};
 SETTINGS["bwr_show"] = "perfect";
 
@@ -375,7 +377,12 @@ function reconstruct() {
           text += tmp_text;
         }
         else {
-          text += '<span class="sound">';
+          if (MARKERS.indexOf(all_sequences[layer][i][k][0]) != -1) {
+            text += '<span class="marker">';
+          }
+          else {
+            text += '<span class="sound">';
+          }
           text += all_sequences[layer][i][k];
           if (LAWS["layer_labels"].indexOf(layer) != -1) {
             if (all_laws[layer][i][k].length == 1) {

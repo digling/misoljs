@@ -71,6 +71,17 @@
   color: lightgray;
 }
 
+.marker {
+  width: 5px;
+  background-color: gray;
+  border: 1px solid black;
+  display: inherit;
+  margin: 5px;
+  padding: 5px;
+  font-weight: normal;
+  color: lightyellow;
+}
+
 .unifiedsound {
   background-color: lightblue;
   border: 1px dashed black;
@@ -144,7 +155,6 @@
 }
 
 .pipe {
-  //background-color: black;
   color: black;
   width: 1px;
   display: inline;
