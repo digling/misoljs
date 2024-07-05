@@ -103,6 +103,7 @@ function loadsampledata2() {
   document.getElementById("sequences").value="p a ⁵⁵\n\nd u ²¹⁴\n\nd u ⁵⁵";
 }
 
+/* carry out backwards reconstruction */
 function backwards() {
   document.getElementById("reconstructions-bw").style.display = "flex";
   var strict_mode = (
@@ -118,8 +119,12 @@ function backwards() {
   var tiers_in_text = document.getElementById("tiersbw").value.split("\n");
   var funcs = [];
   tiers_in_text.forEach(function(element) {
-    if (element != "") {
+    element = element.trim().replace(/@/g, "");
+    if (typeof TIERS[element] == "function") {
       funcs.push(element);
+    }
+    else {
+      fakeAlert("The function " + element + " is not defined.");
     }
   });
 
@@ -823,3 +828,15 @@ function compare(a, b) {
   return out;
 }
 
+
+function fakeAlert(text){
+  var falert = document.createElement('div');
+  falert.id = 'fake';
+  var text = '<div class="message"><p>' + text + '</p>';
+  text += '<p><span class="mybutton ok" onclick=' + "document.getElementById('fake').remove();" + '> OK </span></p></div>';
+  falert.className = 'fake_alert';
+
+  document.body.appendChild(falert);
+  falert.innerHTML = text;
+  document.onkeydown = function(event){document.getElementById('fake').remove(); };
+}
