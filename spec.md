@@ -1,3 +1,12 @@
+### 0 Version Information
+
+Key | Value
+--- | ---
+Author | Johann-Mattis List
+Date | 2025-07-23
+Version | 0.2
+
+
 ### 1 Overview
 
 MISOl consists of four major components accessible in four different tabs of the web interface. The first component defines sound classes and sound laws. The former allow to group sounds into arbitrary units, and the latter allow to define how sounds in an ancestral language change into sounds in a descendant language in a certain context. The second component allows to convert words in the ancestral language into words in the descendant language (also known as "forward reconstruction"), and the third component allows to guess from which words in the ancestral language a given word in the target language has evolved. The fourth component allows to import and export data in text form, enabling users to store their analyses, parse the data with additional software tools, or to compare different approaches to solve the same problem in phonological reconstruction. The components are summarized in Figure 1.
@@ -238,14 +247,60 @@ source > target/context
 #### 3.1 Source and Target in Sound Laws
 
 Source and target can be either a single sound, sound class, or list of sounds
-(indicated by square brackets) or a sequence of sounds. If a sequence of sounds
-is provided, this will be interpreted internally by invoking two or more
-separate sound laws. Thus, writing
+(indicated by square brackets), or a sequence of sounds. 
+
+If the source and the target are a list of sounds or a sound class, they must be of the same length. Otherwise, MISOL will throw an error. Thus, the following sound law is fine.
+
+<div class="mycode">
+
+```
+[a b] > [c d]
+```
+
+</div>
+
+Internally, it will be represented as *two* sound laws:
+
+<div class="mycode">
+
+```
+a > c
+b > d
+```
+
+</div>
+
+However, the following is wrong.
+
+<div class="badcode">
+
+```
+[a b] > c
+```
+
+</div>
+
+This means, if you want to define a *merger*, you must repeat the sound in the list of sounds as follows:
+
+<div class="mycode">
+
+```
+[a b] > [c c]
+```
+
+</div>
+
+
+If a sequence of sounds
+is provided (a sequence is defined by passing more than one sound, list of sounds, or sound class, without enclosing them in brackets), this will also be interpreted internally by invoking two or more
+separate sound laws, where preceding or following context is resolved automatically by MISOL.
+
+This, the following code
 
 <div class="mycode">
 
 ```shell
-a b > [c d] / x _ y
+a b > c d / x _ y
 ```
 
 </div>
@@ -260,6 +315,62 @@ b > d / x a _ y
 ```
 
 </div>
+
+A sequence of sounds can consist of individual sounds, sound classes, or lists of sounds. Thus, you could write a sound law as the following one:
+
+<div class="mycode">
+
+```shell
+[p t k] [a i u] > [p p p] [a a a]
+
+```
+
+</div>
+
+This will turned all plosives to the sound `[`p`]` and all vowels to `[`a`]` if the former are followed by the latter. If you want to combine sound classes to form a list of sounds, you can put them into square brackets. Thus, you could define the following sound classes:
+
+<div class="mycode">
+
+```shell
+unvoiced = p t k
+voiced = b d g
+```
+
+</div>
+
+and then combine them to match unvoiced and voiced plosives in a single list in a sound law.
+
+<div class="mycode">
+
+```shell
+[unvoiced voiced] > [p p p p p p]
+```
+
+</div>
+
+In this sound law, all plosives are turned to a `[`p`]`. However, if you write 
+
+<div class="badcode">
+
+```shell
+unvoiced voiced > [p p p p p p]
+```
+
+</div>
+
+the sound classes are interpreted as consecutive sounds and the parsing won't work. The following law, however, would work, since you define two lists that follow each other.
+
+<div class="badcode">
+
+```shell
+unvoiced voiced > [p p p] [p p p]
+```
+
+</div>
+
+
+
+
 
 Allowing to define consecutive sounds is thus a mere shortcut but it can come
 in handy in those cases where it seems difficult to define complex sound laws.
@@ -465,7 +576,7 @@ t > d / @stress[0]_
 
 When applying this sound law in forward reconstruction, one must provide both tiers (the segments tier and the stress tier) and pass the names of these tiers in the text field to the right of the field where one inserts the sound sequences to be modified, as shown in Figure 2.
 
-![Figure 2: Using multi-tiered sequence representations in sound laws.](img/example-3-3.png){ width=90% }
+![Figure 2: Using multi-tiered sequence representations in sound laws.](img/example-3-3-a.png){ width=90% }
 
 The most common use-cases for sound laws with tiers is to define the specific tier value that holds for the segment that one intends to change (such as we have seen in the example). Other use cases, however, are also possible, when thinking of cases where a certain tier value holds for preceding or following sounds. 
 
